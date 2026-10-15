@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#14152a">
-  <meta name="description" content="《猜猜谁是れなぁ》手机友好的逻辑推理小游戏：三句发言、一条真实证据、一次追问。">
+  <meta name="description" content="《猜猜谁是れなぁ》手机友好的逻辑推理小游戏：三句发言、一条真实证据、一次追问，赛后完整推理复盘。">
   <title>猜猜谁是れなぁ · 试玩版</title>
   <style>
     :root{color-scheme:dark;--bg:#14152a;--panel:#20213b;--panel2:#292b49;--edge:#444563;--text:#f8f5fc;--muted:#cac6df;--pink:#f5a6d2;--pink2:#e97ebf;--violet:#a99bfb;--mint:#a7ead5;--red:#ffbdbf;--shadow:0 20px 50px #07081754}
@@ -75,6 +75,31 @@
     .reveal-box.real{border-color:var(--pink);background:#443048}
     .reveal-box .label{font-size:12px;color:var(--muted);display:block}
     .reveal-box .name{display:block;font-weight:800;font-size:17px;overflow-wrap:anywhere}
+    .recap-jump{display:block;width:100%;margin:8px 0 19px}
+    .recap{margin-top:22px;padding-top:21px;border-top:1px solid #6a6684}
+    .recap-head{margin-bottom:15px}
+    .recap-head h3{font-size:22px;line-height:1.35;margin:0 0 8px}
+    .recap-compare{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-bottom:20px}
+    .recap-stat{border:1px solid var(--edge);border-radius:14px;background:#191b32;padding:12px 13px;min-width:0}
+    .recap-stat .stat-label{display:block;font-size:12px;color:var(--muted);margin-bottom:3px}
+    .recap-stat .stat-value{display:block;font-size:15px;line-height:1.45;font-weight:800;overflow-wrap:anywhere}
+    .recap-steps{border-left:2px solid #66627e;margin-left:11px;padding-left:20px}
+    .recap-step{position:relative;margin-bottom:22px;min-width:0}
+    .recap-step:last-child{margin-bottom:0}
+    .recap-step::before{content:attr(data-number);position:absolute;left:-33px;top:-2px;width:24px;height:24px;border-radius:50%;background:#373458;border:2px solid var(--pink);color:var(--text);font-size:12px;font-weight:800;text-align:center;line-height:20px}
+    .recap-step h4{font-size:16px;line-height:1.4;margin:0 0 7px}
+    .recap-step p{font-size:14px;line-height:1.7;color:#dfdaef;margin:0 0 9px}
+    .trace-list{display:grid;gap:8px;margin:9px 0 12px}
+    .trace-card{border:1px solid #545471;background:#191d34;border-radius:11px;padding:10px 12px;min-width:0;overflow-wrap:anywhere}
+    .trace-card.kept{border-left:3px solid var(--mint)}
+    .trace-card.removed{border-left:3px solid var(--red)}
+    .trace-card .trace-top{font-size:13px;font-weight:800;color:var(--text);margin-bottom:3px}
+    .trace-card .trace-why{font-size:12px;color:var(--muted);line-height:1.65;margin-top:5px}
+    .combo{font-size:13px;line-height:1.65;overflow-wrap:anywhere}
+    .trace-details{padding:10px 11px 12px;border:1px solid var(--edge);border-radius:12px;margin:10px 0;background:#15192d}
+    .trace-details summary{color:var(--mint);font-size:13px;margin-left:14px}
+    .trace-details .trace-list{margin-bottom:0}
+    .recap-summary{border:1px solid #8283aa;background:#252644;border-radius:13px;padding:14px;margin-top:8px;font-size:14px;line-height:1.8}
     .bottom-actions{display:flex;gap:9px;margin-top:17px}
     .bottom-actions .primary{flex:1}
     .footer{text-align:center;font-size:12px;color:#a3a0bd;margin-top:28px}
@@ -97,6 +122,9 @@
       .speaker .said{margin:0;font-size:12px}
       .speaker .claim{font-size:23px}
       .reveal-box .name{font-size:15px}
+      .recap-compare{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .recap-stat{padding:9px 10px}
+      .recap-stat .stat-value{font-size:14px}
     }
     @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
   </style>
@@ -108,7 +136,7 @@
       <button id="helpBtn" class="subtle-btn" type="button">玩法说明</button>
     </header>
     <section id="welcome" class="hero" aria-label="游戏介绍">
-      <p class="eyebrow">FAN-MADE · TEST VERSION 0.1</p>
+      <p class="eyebrow">FAN-MADE · TEST VERSION 0.2</p>
       <h1>猜猜谁是<br>れなぁ？</h1>
       <p class="lede">三句发言，一条绝对真实的证据，以及只有一次的追问机会。你能找到真正的れなぁ吗？</p>
       <div class="steps" aria-label="游戏流程">
@@ -176,15 +204,25 @@
         <p class="eyebrow">RESULT</p>
         <h2 id="resultTitle" class="result"></h2>
         <p id="resultExplanation"></p>
+        <button id="jumpRecapBtn" class="secondary recap-jump" type="button">查看完整推理复盘 ↓</button>
         <h3>三个人的真实身份</h3>
         <div id="reveal" class="reveal"></div>
         <p id="resultTip" class="small"></p>
+        <section class="recap" id="recap" aria-labelledby="recapTitle">
+          <div class="recap-head">
+            <p class="eyebrow">HOW THE PUZZLE WORKED</p>
+            <h3 id="recapTitle">系统推理复盘</h3>
+            <p class="small">下面是本局的完整排除过程。和你自己的判断对比一下：哪里想得一样，哪里还有新的可能？</p>
+          </div>
+          <div id="recapComparison" class="recap-compare"></div>
+          <div id="recapSteps" class="recap-steps"></div>
+        </section>
         <div class="bottom-actions">
           <button id="newGameBtn" class="primary" type="button">再玩一局 →</button>
         </div>
       </section>
     </section>
-    <footer class="footer">粉丝制作的非官方逻辑小游戏 · 试玩版 v0.1<br>本页不收集个人信息，游戏过程仅在浏览器内进行。</footer>
+    <footer class="footer">粉丝制作的非官方逻辑小游戏 · 试玩版 v0.2<br>本页不收集个人信息，游戏过程仅在浏览器内进行。</footer>
   </main>
   <dialog id="helpDialog" aria-labelledby="helpTitle">
     <h2 id="helpTitle">玩法说明</h2>
@@ -233,8 +271,11 @@
     function evidenceFor(truth) {
       return position(truth,'ひかる')<position(truth,RENAA)?['ひかる',RENAA]:[RENAA,'ひかる'];
     }
+    function matchesSpeech(candidate,claims) {
+      return NUMBERS.every(n=>candidate[n]===RENAA || candidate[n]!==claims[n]);
+    }
     function matchesFirst(candidate,claims,evidence) {
-      return NUMBERS.every(n=>candidate[n]===RENAA || candidate[n]!==claims[n]) &&
+      return matchesSpeech(candidate,claims) &&
         position(candidate,evidence[0])<position(candidate,evidence[1]);
     }
     function initialPossibilities(claims,evidence) {
@@ -270,6 +311,122 @@
         if(!provable(possibilities) && safe.length>0) return {truth,claims,evidence,possibilities,safe};
       }
       throw new Error('生成谜题失败，请重试。');
+    }
+    // 复盘只读取本局已经产生的公开线索与结算数据；不改变出题或判定算法。
+    function el(tag,className,text){
+      const node=document.createElement(tag);
+      if(className) node.className=className;
+      if(text!==undefined) node.textContent=String(text);
+      return node;
+    }
+    function renderCombo(candidate){
+      return NUMBERS.map(n=>`${n}号 ${candidate[n]}`).join(' · ');
+    }
+    function renaaNumber(candidate){return NUMBERS.find(n=>candidate[n]===RENAA);}
+    function traceCard(heading,combo,why,kept){
+      const node=el('div',`trace-card ${kept?'kept':'removed'}`);
+      node.append(el('div','trace-top',heading));
+      if(combo) node.append(el('div','combo',combo));
+      if(why) node.append(el('div','trace-why',why));
+      return node;
+    }
+    function addCards(parent,items){
+      const wrap=el('div','trace-list');
+      items.forEach(card=>wrap.append(card));
+      parent.append(wrap);
+    }
+    function addDetails(parent,title,cards){
+      if(cards.length===0)return;
+      const details=el('details','trace-details');
+      details.append(el('summary','',`${title}（${cards.length}）`));
+      addCards(details,cards);
+      parent.append(details);
+    }
+    function addStep(container,number,title,description){
+      const step=el('section','recap-step');
+      step.dataset.number=number;
+      step.append(el('h4','',title),el('p','',description));
+      container.append(step);
+      return step;
+    }
+    function addStat(parent,label,value){
+      const node=el('div','recap-stat');
+      node.append(el('span','stat-label',label),el('strong','stat-value',value));
+      parent.append(node);
+    }
+    function counterfactuals(num){
+      const answers=new Map();
+      for(const candidate of current.possibilities){
+        for(const possibleAnswer of followupOptions(candidate,num,current.claims)){
+          if(!answers.has(possibleAnswer)) answers.set(possibleAnswer,new Set());
+          answers.get(possibleAnswer).add(renaaNumber(candidate));
+        }
+      }
+      return [...answers.entries()].map(([answer,positions])=>({answer,positions:[...positions].sort()}));
+    }
+    function renderRecap(){
+      const stats=$('recapComparison');
+      const steps=$('recapSteps');
+      stats.replaceChildren();steps.replaceChildren();
+      const actual=renaaNumber(current.truth);
+      const proven=provable(remaining);
+      const correct=selectedGuess===actual;
+      addStat(stats,'你的追问',`${chosen}号 → ${followupAnswer}`);
+      addStat(stats,'保证解开的追问',current.safe.map(n=>`${n}号`).join('、'));
+      addStat(stats,'你的答案',`${selectedGuess}号`);
+      addStat(stats,'真正的れなぁ',`${actual}号`);
+
+      // 1. 初次发言：不查看实际身份，枚举三人位置的全部六种可能。
+      const afterSpeech=ALL_ASSIGNMENTS.filter(candidate=>matchesSpeech(candidate,current.claims));
+      const first=addStep(steps,'1','只看第一次发言',`三个身份各不相同，一共有6种排列。ほのす、ひかる不能声称自己是本人；れなぁ可以。根据三句话，先留下${afterSpeech.length}种可能。`);
+      addCards(first,afterSpeech.map(candidate=>traceCard('符合发言规则',renderCombo(candidate),null,true)));
+      const excludedSpeech=ALL_ASSIGNMENTS.filter(candidate=>!matchesSpeech(candidate,current.claims));
+      addDetails(first,'查看被第一次发言排除的排列',excludedSpeech.map(candidate=>{
+        const broken=NUMBERS.filter(n=>candidate[n]!==RENAA && candidate[n]===current.claims[n]);
+        return traceCard('违反说谎规则',renderCombo(candidate),broken.map(n=>`${n}号若是${candidate[n]}，却声称自己是${current.claims[n]}：必须说假话的人说了真话。`).join(' '),false);
+      }));
+
+      // 2. 客观证据：只在第一步保留下来的排列上检查位置。
+      const [left,right]=current.evidence;
+      const second=addStep(steps,'2','再检查真实位置证据',`证据是「${left}在${right}左边」。位置从1号到3号依次向右；符合证据的剩下${current.possibilities.length}种。`);
+      addCards(second,current.possibilities.map(candidate=>traceCard('证据符合',renderCombo(candidate),`${left}在${position(candidate,left)+1}号，${right}在${position(candidate,right)+1}号。`,true)));
+      const excludedEvidence=afterSpeech.filter(candidate=>!matchesFirst(candidate,current.claims,current.evidence));
+      addDetails(second,'查看被位置证据排除的排列',excludedEvidence.map(candidate=>traceCard('位置不符合',renderCombo(candidate),`${left}在${position(candidate,left)+1}号，${right}在${position(candidate,right)+1}号；前者不在后者左边。`,false)));
+
+      // 3. 复盘用户追问，以及追问的所有反事实后果；不同于系统窥看真实答案。
+      const third=addStep(steps,'3','回看追问选择',`你追问了${chosen}号。系统会检查：如果追问1、2、3号，各自所有合法回答会留下哪些れなぁ位置。只有每种回答都对应同一个位置，这个人才算「保证能解开」。`);
+      for(const num of NUMBERS){
+        const isSafe=current.safe.includes(num);
+        const selected=num===chosen;
+        const details=el('details','trace-details');
+        details.open=selected;
+        details.append(el('summary','',`${num}号：${isSafe?'保证可以解开':'可能仍有歧义'}${selected?' · 你选了这里':''}`));
+        const outcomes=counterfactuals(num).map(({answer,positions})=>traceCard(`如果回答「${answer}」`,null,`れなぁ可能是：${positions.map(n=>n+'号').join('、')}。${positions.length===1?'这个回答能唯一确定位置。':'这个回答仍不能唯一确定位置。'}`,positions.length===1));
+        addCards(details,outcomes);third.append(details);
+      }
+      third.append(el('p','',current.safe.includes(chosen)?'你选到了一位可以保证解开的追问对象。':'你选择的追问对象并非必胜：即使这次恰好得到有效回答，换一种合法回答仍可能无法确定答案。'));
+
+      // 4. 追问后的排除：逐一列出每项候选身份下对方允许说什么。
+      const fourth=addStep(steps,'4','用实际追问回答继续排除',`${chosen}号第一次声称「${current.claims[chosen]}」，第二次回答「${followupAnswer}」。同一个人不能重复第一次的名字；普通角色也不能说出真实身份。`);
+      addCards(fourth,current.possibilities.map(candidate=>{
+        const options=followupOptions(candidate,chosen,current.claims);
+        const allowed=options.includes(followupAnswer);
+        return traceCard(allowed?'保留这项假设':'排除这项假设',renderCombo(candidate),`在这个假设中，${chosen}号是${candidate[chosen]}，第二次只能回答「${options.join('」或「')}」。实际回答「${followupAnswer}」${allowed?'与规则一致。':'违反规则。'}`,allowed);
+      }));
+
+      // 5. 由玩家公开线索能推出的结论，以及用户选择与系统结论的区别。
+      const fifth=addStep(steps,'5','对照答案与推理结论',`追问后剩下${remaining.length}种合法身份排列。`);
+      addCards(fifth,remaining.map(candidate=>traceCard('追问后仍成立',renderCombo(candidate),`这一项假设里，れなぁ在${renaaNumber(candidate)}号。`,true)));
+      const summary=el('div','recap-summary');
+      if(proven){
+        summary.textContent=correct
+          ?`最终只可能是${actual}号。你的答案是${selectedGuess}号，与系统结论一致。现有证据足够证明这个答案；但系统无法判断你当时是不是靠猜测选中的。`
+          :`现有证据已经唯一指向${actual}号，但你选择了${selectedGuess}号。可以回看第4步，看看是哪一项假设被第二次回答排除了。`;
+      } else {
+        const validPositions=[...new Set(remaining.map(renaaNumber))].sort();
+        summary.textContent=`实际的れなぁ是${actual}号，你选了${selectedGuess}号${correct?'（碰巧答对）':'（回答错误）'}。但根据玩家当时拿到的全部公开信息，れなぁ仍可能是${validPositions.map(n=>n+'号').join('或')}，没有足够证据证明唯一答案。`;
+      }
+      fifth.append(summary);
     }
     function putText(id,value){$(id).textContent=value;}
     function show(id,visible=true){$(id).hidden=!visible;}
@@ -341,7 +498,7 @@
       const proven=provable(remaining);
       const title=$('resultTitle');
       title.className='result '+(correct&&proven?'success':correct?'warn':'wrong');
-      if(correct&&proven){title.textContent='推理通关！';putText('resultExplanation','答案正确，而且追问后的公开线索足以唯一确定れなぁ。');}
+      if(correct&&proven){title.textContent='回答正确 · 线索充分！';putText('resultExplanation','答案正确，而且公开线索足以唯一确定れなぁ。赛后复盘可以帮助你对照自己的推理过程。');}
       else if(correct){title.textContent='猜对了，但不能证明';putText('resultExplanation','你的答案碰巧正确；但这次追问后，仍存在其他符合所有线索的身份排列，因此不算推理通关。');}
       else if(proven){title.textContent='这次没猜中';putText('resultExplanation',`现有线索已经能够确定れなぁ，但你选择了${selectedGuess}号。正确答案是${actualNum}号。`);}
       else{title.textContent='这次没猜中';putText('resultExplanation','这次追问后，公开线索仍无法唯一确定れなぁ；即使碰巧猜对，也不能算推理通关。');}
@@ -353,11 +510,13 @@
         div.append(a,b);$('reveal').append(div);
       }
       putText('resultTip',`本局能够保证解开的追问对象：${current.safe.map(n=>n+'号').join('、')}。你追问了${chosen}号，得到回答「${followupAnswer}」。`);
+      renderRecap();
       show('answerSection',false);show('resultSection');
       $('resultSection').scrollIntoView({behavior:'smooth',block:'start'});
     });
     $('startBtn').addEventListener('click',startGame);
     $('newGameBtn').addEventListener('click',startGame);
+    $('jumpRecapBtn').addEventListener('click',()=>{$('recap').scrollIntoView({behavior:'smooth',block:'start'});});
     const help=$('helpDialog');
     $('helpBtn').addEventListener('click',()=>help.showModal());
     $('closeHelp').addEventListener('click',()=>help.close());
