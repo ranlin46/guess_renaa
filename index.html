@@ -1,12 +1,13 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#14152a">
-  <meta name="description" content="《猜猜谁是れなぁ》手机友好的逻辑推理小游戏：三句发言、一条真实证据、一次追问，赛后完整推理复盘。">
-  <title>猜猜谁是れなぁ · 试玩版</title>
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1, viewport-fit=cover" name="viewport"/>
+<meta content="#14152a" name="theme-color"/>
+<meta content="《猜猜谁是れなぁ》手机友好的逻辑推理小游戏。浏览器中日文自动切换，支持赛后复盘。" name="description"/>
+<title>猜猜谁是れなぁ · 中日双语试玩版</title>
+<style>
     :root{color-scheme:dark;--bg:#14152a;--panel:#20213b;--panel2:#292b49;--edge:#444563;--text:#f8f5fc;--muted:#cac6df;--pink:#f5a6d2;--pink2:#e97ebf;--violet:#a99bfb;--mint:#a7ead5;--red:#ffbdbf;--shadow:0 20px 50px #07081754}
     *{box-sizing:border-box}
     html{min-height:100%;background:var(--bg)}
@@ -127,400 +128,474 @@
       .recap-stat .stat-value{font-size:14px}
     }
     @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
-  </style>
+  
+    .top-actions{display:flex;gap:7px;align-items:center;flex-shrink:0}
+    .language-btn{border-color:#9b8add;color:var(--pink)}
+    @media(max-width:390px){.topbar{gap:7px}.topbar .brand{font-size:10px;letter-spacing:.04em}.topbar .subtle-btn{padding:8px 10px;font-size:12px}}
+    [lang="ja"] body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif}
+</style>
 </head>
 <body>
-  <main class="shell">
-    <header class="topbar">
-      <div class="brand">✦ れなぁ · LOGIC GAME</div>
-      <button id="helpBtn" class="subtle-btn" type="button">玩法说明</button>
-    </header>
-    <section id="welcome" class="hero" aria-label="游戏介绍">
-      <p class="eyebrow">FAN-MADE · TEST VERSION 0.2</p>
-      <h1>猜猜谁是<br>れなぁ？</h1>
-      <p class="lede">三句发言，一条绝对真实的证据，以及只有一次的追问机会。你能找到真正的れなぁ吗？</p>
-      <div class="steps" aria-label="游戏流程">
-        <div class="step"><strong>01 观察</strong><span>听三个人的发言，阅读真实证据</span></div>
-        <div class="step"><strong>02 追问</strong><span>选择一个人，获得第二句话</span></div>
-        <div class="step"><strong>03 推理</strong><span>判断谁是れなぁ，提交答案</span></div>
-      </div>
-      <div class="rules">
-        <h3>先记住这四条规则</h3>
-        <p><strong>①</strong> 三个人分别是ほのす、ひかる、れなぁ，身份各不相同。</p>
-        <p><strong>②</strong> ほのす和ひかる一定说假话；<strong>れなぁ可以说真话，也可以说假话</strong>。</p>
-        <p><strong>③</strong> 系统给出的<strong>客观证据一定是真的</strong>；位置从左到右是1、2、3号。</p>
-        <p><strong>④</strong> 只能追问<strong>一人一次</strong>，这个人第二次说的名字必须与第一次不同。</p>
-      </div>
-      <button class="primary" type="button" id="startBtn">明白了，开始游戏 →</button>
-      <details>
-        <summary>先看一个简单的推理例子</summary>
-        <p class="example">假设<strong>1号说「ひかる」</strong>，那1号就<strong>不可能是ひかる</strong>：因为ひかる一定说假话。但1号仍可能是ほのす或者れなぁ。<br>卡片显示的是角色<strong>声称的身份</strong>，不是系统公布的真实身份。</p>
-      </details>
-    </section>
-    <section id="game" hidden aria-label="当前谜题">
-      <div class="progress" aria-label="游戏进度">
-        <span id="p1" class="progress-item active">1 · 阅读线索</span>
-        <span id="p2" class="progress-item">2 · 追问一次</span>
-        <span id="p3" class="progress-item">3 · 提交答案</span>
-      </div>
-      <div class="surface gamehead">
-        <p class="eyebrow">THE PUZZLE</p>
-        <h2>谁才是れなぁ？</h2>
-        <p class="task">下面三个名字是他们<strong>说出的身份</strong>，并非真实身份。记住：只有れなぁ可以说真话。</p>
-        <div id="speakers" class="speaker-list" aria-label="三个人的发言"></div>
-        <div class="evidence">
-          <div class="evidence-label">◇ 绝对真实的客观证据</div>
-          <p id="evidenceText" class="evidence-text"></p>
-          <p class="small" style="margin:4px 0 0">“在左边”不要求紧挨着；位置依次是1号、2号、3号。</p>
-        </div>
-      </div>
-      <section id="chooseSection" class="surface" aria-label="选择追问对象">
-        <p class="eyebrow">ONE QUESTION</p>
-        <h2>你要追问谁？</h2>
-        <p class="task">只有一次追问机会。题目保证存在一个能让你确定答案的选择，但不是每个人都值得追问。</p>
-        <div id="askChoices" class="choice-row" role="group" aria-label="选择追问对象">
-          <button class="choice" type="button" data-ask="1" aria-pressed="false">追问1号</button>
-          <button class="choice" type="button" data-ask="2" aria-pressed="false">追问2号</button>
-          <button class="choice" type="button" data-ask="3" aria-pressed="false">追问3号</button>
-        </div>
-        <button id="confirmAsk" class="primary confirm" type="button" disabled>先选择一位追问对象</button>
-      </section>
-      <section id="answerSection" class="surface" hidden aria-label="提交答案">
-        <p class="eyebrow">FINAL ANSWER</p>
-        <h2>现在，作出判断</h2>
-        <div class="followup" aria-live="polite">
-          <div id="followupWho" class="who"></div>
-          <p id="followupAnswer" class="answer"></p>
-        </div>
-        <p class="task">你已经使用了唯一一次追问。结合最初的发言与证据，选择真正的れなぁ。</p>
-        <div id="guessChoices" class="choice-row" role="group" aria-label="选择れなぁ的编号">
-          <button class="choice" type="button" data-guess="1" aria-pressed="false">1号</button>
-          <button class="choice" type="button" data-guess="2" aria-pressed="false">2号</button>
-          <button class="choice" type="button" data-guess="3" aria-pressed="false">3号</button>
-        </div>
-        <button id="submitGuess" class="primary confirm" type="button" disabled>先选择你的答案</button>
-      </section>
-      <section id="resultSection" class="surface" hidden aria-label="游戏结果" aria-live="polite">
-        <p class="eyebrow">RESULT</p>
-        <h2 id="resultTitle" class="result"></h2>
-        <p id="resultExplanation"></p>
-        <button id="jumpRecapBtn" class="secondary recap-jump" type="button">查看完整推理复盘 ↓</button>
-        <h3>三个人的真实身份</h3>
-        <div id="reveal" class="reveal"></div>
-        <p id="resultTip" class="small"></p>
-        <section class="recap" id="recap" aria-labelledby="recapTitle">
-          <div class="recap-head">
-            <p class="eyebrow">HOW THE PUZZLE WORKED</p>
-            <h3 id="recapTitle">系统推理复盘</h3>
-            <p class="small">下面是本局的完整排除过程。和你自己的判断对比一下：哪里想得一样，哪里还有新的可能？</p>
-          </div>
-          <div id="recapComparison" class="recap-compare"></div>
-          <div id="recapSteps" class="recap-steps"></div>
-        </section>
-        <div class="bottom-actions">
-          <button id="newGameBtn" class="primary" type="button">再玩一局 →</button>
-        </div>
-      </section>
-    </section>
-    <footer class="footer">粉丝制作的非官方逻辑小游戏 · 试玩版 v0.2<br>本页不收集个人信息，游戏过程仅在浏览器内进行。</footer>
-  </main>
-  <dialog id="helpDialog" aria-labelledby="helpTitle">
-    <h2 id="helpTitle">玩法说明</h2>
-    <p>目标：根据三个人的发言和一条真实证据，找出谁是<strong>れなぁ</strong>。</p>
-    <div class="rules" style="margin:12px 0">
-      <p>每局的1、2、3号分别是<strong>ほのす、ひかる、れなぁ</strong>，每个身份恰好一个。</p>
-      <p><strong>ほのす、ひかる永远说假话</strong>：她们不能声称自己是真实身份。</p>
-      <p><strong>れなぁ可真可假</strong>，因此说出「れなぁ」的人也可能真的就是她。</p>
-      <p>客观位置证据<strong>永远真实</strong>。编号1→2→3从左到右排列；「在左边」不一定相邻。</p>
-      <p>你有<strong>一次</strong>追问机会，回答不能重复此人的第一句话。选择不同的人可能影响能否得到唯一答案。</p>
-    </div>
-    <p class="small">例子：1号说「ひかる」意味着1号不是ひかる，但不代表1号一定是れなぁ。</p>
-    <p class="small">只有答案正确且现有公开线索足够证明答案，才算<strong>推理通关</strong>。猜对但证据不足，会得到不同的提示。</p>
-    <button id="closeHelp" class="secondary" type="button">我知道了</button>
-  </dialog>
-  <script>
-    'use strict';
-    const CHARACTERS = ['ほのす','ひかる','れなぁ'];
-    const NUMBERS = ['1','2','3'];
-    const RENAA = 'れなぁ';
-    const $ = id => document.getElementById(id);
-    let current = null;
-    let phase = 'welcome';
-    let selectedAsk = null;
-    let selectedGuess = null;
-    let chosen = null;
-    let followupAnswer = null;
-    let remaining = null;
+<main class="shell">
+<header class="topbar">
+<div class="brand">✦ れなぁ · LOGIC GAME</div>
+<div class="top-actions"><button aria-label="切换语言" class="subtle-btn language-btn" id="languageBtn" type="button">日本語</button><button class="subtle-btn" data-i18n="s00" id="helpBtn" type="button">玩法说明</button></div>
+</header>
+<section aria-label="游戏介绍" class="hero" data-i18n-aria="a0" id="welcome">
+<p class="eyebrow" data-i18n="s01">FAN-MADE · TEST VERSION 0.2</p>
+<h1 data-i18n="s02">猜猜谁是<br/>れなぁ？</h1>
+<p class="lede" data-i18n="s03">三句发言，一条绝对真实的证据，以及只有一次的追问机会。你能找到真正的れなぁ吗？</p>
+<div aria-label="游戏流程" class="steps" data-i18n-aria="a1">
+<div class="step"><strong data-i18n="s04">01 观察</strong><span data-i18n="s05">听三个人的发言，阅读真实证据</span></div>
+<div class="step"><strong data-i18n="s06">02 追问</strong><span data-i18n="s07">选择一个人，获得第二句话</span></div>
+<div class="step"><strong data-i18n="s08">03 推理</strong><span data-i18n="s09">判断谁是れなぁ，提交答案</span></div>
+</div>
+<div class="rules">
+<h3 data-i18n="s10">先记住这四条规则</h3>
+<p data-i18n="s11"><strong>①</strong> 三个人分别是ほのす、ひかる、れなぁ，身份各不相同。</p>
+<p data-i18n="s12"><strong>②</strong> ほのす和ひかる一定说假话；<strong>れなぁ可以说真话，也可以说假话</strong>。</p>
+<p data-i18n="s13"><strong>③</strong> 系统给出的<strong>客观证据一定是真的</strong>；位置从左到右是1、2、3号。</p>
+<p data-i18n="s14"><strong>④</strong> 只能追问<strong>一人一次</strong>，这个人第二次说的名字必须与第一次不同。</p>
+</div>
+<button class="primary" data-i18n="s15" id="startBtn" type="button">明白了，开始游戏 →</button>
+<details>
+<summary data-i18n="s16">先看一个简单的推理例子</summary>
+<p class="example" data-i18n="s17">假设<strong>1号说「ひかる」</strong>，那1号就<strong>不可能是ひかる</strong>：因为ひかる一定说假话。但1号仍可能是ほのす或者れなぁ。<br/>卡片显示的是角色<strong>声称的身份</strong>，不是系统公布的真实身份。</p>
+</details>
+</section>
+<section aria-label="当前谜题" data-i18n-aria="a2" hidden="" id="game">
+<div aria-label="游戏进度" class="progress" data-i18n-aria="a3">
+<span class="progress-item active" data-i18n="s18" id="p1">1 · 阅读线索</span>
+<span class="progress-item" data-i18n="s19" id="p2">2 · 追问一次</span>
+<span class="progress-item" data-i18n="s20" id="p3">3 · 提交答案</span>
+</div>
+<div class="surface gamehead">
+<p class="eyebrow" data-i18n="s21">THE PUZZLE</p>
+<h2 data-i18n="s22">谁才是れなぁ？</h2>
+<p class="task" data-i18n="s23">下面三个名字是他们<strong>说出的身份</strong>，并非真实身份。记住：只有れなぁ可以说真话。</p>
+<div aria-label="三个人的发言" class="speaker-list" data-i18n-aria="a4" id="speakers"></div>
+<div class="evidence">
+<div class="evidence-label" data-i18n="s24">◇ 绝对真实的客观证据</div>
+<p class="evidence-text" id="evidenceText"></p>
+<p class="small" data-i18n="s25" style="margin:4px 0 0">“在左边”不要求紧挨着；位置依次是1号、2号、3号。</p>
+</div>
+</div>
+<section aria-label="选择追问对象" class="surface" data-i18n-aria="a5" id="chooseSection">
+<p class="eyebrow" data-i18n="s26">ONE QUESTION</p>
+<h2 data-i18n="s27">你要追问谁？</h2>
+<p class="task" data-i18n="s28">只有一次追问机会。题目保证存在一个能让你确定答案的选择，但不是每个人都值得追问。</p>
+<div aria-label="选择追问对象" class="choice-row" data-i18n-aria="a6" id="askChoices" role="group">
+<button aria-pressed="false" class="choice" data-ask="1" data-i18n="s29" type="button">追问1号</button>
+<button aria-pressed="false" class="choice" data-ask="2" data-i18n="s30" type="button">追问2号</button>
+<button aria-pressed="false" class="choice" data-ask="3" data-i18n="s31" type="button">追问3号</button>
+</div>
+<button class="primary confirm" disabled="" id="confirmAsk" type="button">先选择一位追问对象</button>
+</section>
+<section aria-label="提交答案" class="surface" data-i18n-aria="a7" hidden="" id="answerSection">
+<p class="eyebrow" data-i18n="s32">FINAL ANSWER</p>
+<h2 data-i18n="s33">现在，作出判断</h2>
+<div aria-live="polite" class="followup">
+<div class="who" id="followupWho"></div>
+<p class="answer" id="followupAnswer"></p>
+</div>
+<p class="task" data-i18n="s34">你已经使用了唯一一次追问。结合最初的发言与证据，选择真正的れなぁ。</p>
+<div aria-label="选择れなぁ的编号" class="choice-row" data-i18n-aria="a8" id="guessChoices" role="group">
+<button aria-pressed="false" class="choice" data-guess="1" data-i18n="s35" type="button">1号</button>
+<button aria-pressed="false" class="choice" data-guess="2" data-i18n="s36" type="button">2号</button>
+<button aria-pressed="false" class="choice" data-guess="3" data-i18n="s37" type="button">3号</button>
+</div>
+<button class="primary confirm" disabled="" id="submitGuess" type="button">先选择你的答案</button>
+</section>
+<section aria-label="游戏结果" aria-live="polite" class="surface" data-i18n-aria="a9" hidden="" id="resultSection">
+<p class="eyebrow" data-i18n="s38">RESULT</p>
+<h2 class="result" id="resultTitle"></h2>
+<p id="resultExplanation"></p>
+<button class="secondary recap-jump" data-i18n="s39" id="jumpRecapBtn" type="button">查看完整推理复盘 ↓</button>
+<h3 data-i18n="s40">三个人的真实身份</h3>
+<div class="reveal" id="reveal"></div>
+<p class="small" id="resultTip"></p>
+<section aria-labelledby="recapTitle" class="recap" id="recap">
+<div class="recap-head">
+<p class="eyebrow" data-i18n="s41">HOW THE PUZZLE WORKED</p>
+<h3 data-i18n="s42" id="recapTitle">系统推理复盘</h3>
+<p class="small" data-i18n="s43">下面是本局的完整排除过程。和你自己的判断对比一下：哪里想得一样，哪里还有新的可能？</p>
+</div>
+<div class="recap-compare" id="recapComparison"></div>
+<div class="recap-steps" id="recapSteps"></div>
+</section>
+<div class="bottom-actions">
+<button class="primary" data-i18n="s44" id="newGameBtn" type="button">再玩一局 →</button>
+</div>
+</section>
+</section>
+<footer class="footer" data-i18n="s45">粉丝制作的非官方逻辑小游戏 · 试玩版 v0.2<br/>本页不收集个人信息，游戏过程仅在浏览器内进行。</footer>
+</main>
+<dialog aria-labelledby="helpTitle" id="helpDialog">
+<h2 data-i18n="s46" id="helpTitle">玩法说明</h2>
+<p data-i18n="s47">目标：根据三个人的发言和一条真实证据，找出谁是<strong>れなぁ</strong>。</p>
+<div class="rules" style="margin:12px 0">
+<p data-i18n="s48">每局的1、2、3号分别是<strong>ほのす、ひかる、れなぁ</strong>，每个身份恰好一个。</p>
+<p data-i18n="s49"><strong>ほのす、ひかる永远说假话</strong>：她们不能声称自己是真实身份。</p>
+<p data-i18n="s50"><strong>れなぁ可真可假</strong>，因此说出「れなぁ」的人也可能真的就是她。</p>
+<p data-i18n="s51">客观位置证据<strong>永远真实</strong>。编号1→2→3从左到右排列；「在左边」不一定相邻。</p>
+<p data-i18n="s52">你有<strong>一次</strong>追问机会，回答不能重复此人的第一句话。选择不同的人可能影响能否得到唯一答案。</p>
+</div>
+<p class="small" data-i18n="s53">例子：1号说「ひかる」意味着1号不是ひかる，但不代表1号一定是れなぁ。</p>
+<p class="small" data-i18n="s54">只有答案正确且现有公开线索足够证明答案，才算<strong>推理通关</strong>。猜对但证据不足，会得到不同的提示。</p>
+<button class="secondary" data-i18n="s55" id="closeHelp" type="button">我知道了</button>
+</dialog>
+<script>
+    const STATIC_TRANSLATIONS = {"s00": {"zh": "玩法说明", "ja": "遊び方"}, "s01": {"zh": "FAN-MADE · TEST VERSION 0.3", "ja": "FAN-MADE · TEST VERSION 0.3"}, "s02": {"zh": "猜猜谁是\u003cbr/>れなぁ？", "ja": "れなぁは\u003cbr/>誰？"}, "s03": {"zh": "三句发言，一条绝对真实的证据，以及只有一次的追问机会。你能找到真正的れなぁ吗？", "ja": "3人の発言と、必ず正しい手がかり。そして、追加で聞けるのは一度だけ。本物のれなぁを見つけられる？"}, "s04": {"zh": "01 观察", "ja": "01 観察"}, "s05": {"zh": "听三个人的发言，阅读真实证据", "ja": "3人の発言と手がかりを確認"}, "s06": {"zh": "02 追问", "ja": "02 追加質問"}, "s07": {"zh": "选择一个人，获得第二句话", "ja": "1人だけ選んで、もう一度聞く"}, "s08": {"zh": "03 推理", "ja": "03 推理"}, "s09": {"zh": "判断谁是れなぁ，提交答案", "ja": "れなぁが誰かを選んで回答"}, "s10": {"zh": "先记住这四条规则", "ja": "まずは4つのルール"}, "s11": {"zh": "\u003cstrong>①\u003c/strong> 三个人分别是ほのす、ひかる、れなぁ，身份各不相同。", "ja": "\u003cstrong>①\u003c/strong> 3人の正体はそれぞれ「ほのす」「ひかる」「れなぁ」。重複はありません。"}, "s12": {"zh": "\u003cstrong>②\u003c/strong> ほのす和ひかる一定说假话；\u003cstrong>れなぁ可以说真话，也可以说假话\u003c/strong>。", "ja": "\u003cstrong>②\u003c/strong> ほのすとひかるは\u003cstrong>必ず嘘をつく\u003c/strong>。\u003cstrong>れなぁは本当のことも嘘も言えます\u003c/strong>。"}, "s13": {"zh": "\u003cstrong>③\u003c/strong> 系统给出的\u003cstrong>客观证据一定是真的\u003c/strong>；位置从左到右是1、2、3号。", "ja": "\u003cstrong>③\u003c/strong> ゲームが示す\u003cstrong>位置の手がかりは必ず正しい\u003c/strong>。並びは左から1番・2番・3番です。"}, "s14": {"zh": "\u003cstrong>④\u003c/strong> 只能追问\u003cstrong>一人一次\u003c/strong>，这个人第二次说的名字必须与第一次不同。", "ja": "\u003cstrong>④\u003c/strong> 追加で聞けるのは\u003cstrong>1人に1回だけ\u003c/strong>。2回目には、1回目と違う名前を答えます。"}, "s15": {"zh": "明白了，开始游戏 &rarr;", "ja": "ルールを確認してスタート &rarr;"}, "s16": {"zh": "先看一个简单的推理例子", "ja": "推理の例を見てみる"}, "s17": {"zh": "假设\u003cstrong>1号说「ひかる」\u003c/strong>，那1号就\u003cstrong>不可能是ひかる\u003c/strong>：因为ひかる一定说假话。但1号仍可能是ほのす或者れなぁ。\u003cbr/>卡片显示的是角色\u003cstrong>声称的身份\u003c/strong>，不是系统公布的真实身份。", "ja": "たとえば\u003cstrong>1番が「ひかる」と名乗った\u003c/strong>ら、1番は\u003cstrong>ひかるではありません\u003c/strong>。ひかるは必ず嘘をつくからです。ただし、ほのすかれなぁの可能性は残ります。カードに表示されるのは\u003cstrong>本人が名乗った名前\u003c/strong>で、本当の正体ではありません。"}, "s18": {"zh": "1 &middot; 阅读线索", "ja": "1 &middot; ヒントを読む"}, "s19": {"zh": "2 &middot; 追问一次", "ja": "2 &middot; もう一度聞く"}, "s20": {"zh": "3 &middot; 提交答案", "ja": "3 &middot; 回答する"}, "s21": {"zh": "THE PUZZLE", "ja": "THE PUZZLE"}, "s22": {"zh": "谁才是れなぁ？", "ja": "れなぁは誰？"}, "s23": {"zh": "下面三个名字是他们\u003cstrong>说出的身份\u003c/strong>，并非真实身份。记住：只有れなぁ可以说真话。", "ja": "表示されているのは3人が\u003cstrong>名乗った名前\u003c/strong>。本当の正体とは限りません。真実を言えるのはれなぁだけです。"}, "s24": {"zh": "◇ 绝对真实的客观证据", "ja": "◇ 必ず正しい手がかり"}, "s25": {"zh": "&ldquo;在左边&rdquo;不要求紧挨着；位置依次是1号、2号、3号。", "ja": "「左にいる」は隣同士とは限りません。左から1番、2番、3番です。"}, "s26": {"zh": "ONE QUESTION", "ja": "ONE QUESTION"}, "s27": {"zh": "你要追问谁？", "ja": "誰にもう一度聞く？"}, "s28": {"zh": "只有一次追问机会。题目保证存在一个能让你确定答案的选择，但不是每个人都值得追问。", "ja": "追加で聞けるのは1人だけ。必ず正体を特定できる聞き方がありますが、誰に聞いてもいいわけではありません。"}, "s29": {"zh": "追问1号", "ja": "1番に聞く"}, "s30": {"zh": "追问2号", "ja": "2番に聞く"}, "s31": {"zh": "追问3号", "ja": "3番に聞く"}, "s32": {"zh": "FINAL ANSWER", "ja": "FINAL ANSWER"}, "s33": {"zh": "现在，作出判断", "ja": "いよいよ最終回答"}, "s34": {"zh": "你已经使用了唯一一次追问。结合最初的发言与证据，选择真正的れなぁ。", "ja": "追加質問はここまで。最初の発言と手がかりも合わせて、れなぁを選んでください。"}, "s35": {"zh": "1号", "ja": "1番"}, "s36": {"zh": "2号", "ja": "2番"}, "s37": {"zh": "3号", "ja": "3番"}, "s38": {"zh": "RESULT", "ja": "RESULT"}, "s39": {"zh": "查看完整推理复盘 &darr;", "ja": "解説・推理の振り返りを見る &darr;"}, "s40": {"zh": "三个人的真实身份", "ja": "3人の本当の正体"}, "s41": {"zh": "HOW THE PUZZLE WORKED", "ja": "HOW THE PUZZLE WORKED"}, "s42": {"zh": "系统推理复盘", "ja": "推理の振り返り"}, "s43": {"zh": "下面是本局的完整排除过程。和你自己的判断对比一下：哪里想得一样，哪里还有新的可能？", "ja": "今回の手がかりからどう絞り込めるのか、順を追って見てみましょう。自分の考え方とも比べてみてください。"}, "s44": {"zh": "再玩一局 &rarr;", "ja": "もう一度遊ぶ &rarr;"}, "s45": {"zh": "粉丝制作的非官方逻辑小游戏 · 试玩版 v0.3\u003cbr/>本页不收集个人信息，游戏过程仅在浏览器内进行。", "ja": "ファン制作の非公式推理ゲーム · おためし版 v0.3\u003cbr/>個人情報は収集しません。ゲームはブラウザ内で動作します。"}, "s46": {"zh": "玩法说明", "ja": "遊び方"}, "s47": {"zh": "目标：根据三个人的发言和一条真实证据，找出谁是\u003cstrong>れなぁ\u003c/strong>。", "ja": "目的：3人の発言と必ず正しい手がかりを使って、\u003cstrong>本物のれなぁ\u003c/strong>を見つけよう。"}, "s48": {"zh": "每局的1、2、3号分别是\u003cstrong>ほのす、ひかる、れなぁ\u003c/strong>，每个身份恰好一个。", "ja": "1番・2番・3番の正体は\u003cstrong>ほのす・ひかる・れなぁ\u003c/strong>の3人で、それぞれ1人ずつです。"}, "s49": {"zh": "\u003cstrong>ほのす、ひかる永远说假话\u003c/strong>：她们不能声称自己是真实身份。", "ja": "\u003cstrong>ほのすとひかるは必ず嘘をつきます\u003c/strong>。本当の自分の名前は答えません。"}, "s50": {"zh": "\u003cstrong>れなぁ可真可假\u003c/strong>，因此说出「れなぁ」的人也可能真的就是她。", "ja": "\u003cstrong>れなぁは本当のことも嘘も言えます\u003c/strong>。「れなぁ」と名乗った人が、本当にれなぁかもしれません。"}, "s51": {"zh": "客观位置证据\u003cstrong>永远真实\u003c/strong>。编号1&rarr;2&rarr;3从左到右排列；「在左边」不一定相邻。", "ja": "位置の手がかりは\u003cstrong>必ず正しい\u003c/strong>ものです。左から1番&rarr;2番&rarr;3番。「左にいる」は隣とは限りません。"}, "s52": {"zh": "你有\u003cstrong>一次\u003c/strong>追问机会，回答不能重复此人的第一句话。选择不同的人可能影响能否得到唯一答案。", "ja": "追加質問は\u003cstrong>1人に1回だけ\u003c/strong>。同じ人は1回目と違う名前を答えます。誰に聞くかが推理のカギです。"}, "s53": {"zh": "例子：1号说「ひかる」意味着1号不是ひかる，但不代表1号一定是れなぁ。", "ja": "例：1番が「ひかる」と言ったなら、1番はひかるではありません。ただし、れなぁだと決まるわけでもありません。"}, "s54": {"zh": "答案正确与线索是否足以证明，是两件不同的事。不会时也可以先凭直觉作答，结束后对照系统的推理复盘。", "ja": "正解かどうかと、手がかりだけで答えを絞れるかは別のこと。迷ったら直感で答えても大丈夫。終了後に推理の解説を確認できます。"}, "s55": {"zh": "我知道了", "ja": "閉じる"}};
+    const ARIA_TRANSLATIONS = {"a0": {"zh": "游戏介绍", "ja": "ゲーム紹介"}, "a1": {"zh": "游戏流程", "ja": "ゲームの流れ"}, "a2": {"zh": "当前谜题", "ja": "出題中"}, "a3": {"zh": "游戏进度", "ja": "ゲームの進行状況"}, "a4": {"zh": "三个人的发言", "ja": "3人の発言"}, "a5": {"zh": "选择追问对象", "ja": "追加質問する人を選ぶ"}, "a6": {"zh": "选择追问对象", "ja": "追加質問する人を選ぶ"}, "a7": {"zh": "提交答案", "ja": "回答する"}, "a8": {"zh": "选择れなぁ的编号", "ja": "れなぁだと思う番号を選ぶ"}, "a9": {"zh": "游戏结果", "ja": "結果"}};
+'use strict';
+// 出题算法与 Python 版一致；语言切换只影响显示，不会生成新题目。
+const CHARACTERS = ['ほのす', 'ひかる', 'れなぁ'];
+const NUMBERS = ['1', '2', '3'];
+const RENAA = 'れなぁ';
+const $ = id => document.getElementById(id);
 
-    function pick(values) { return values[Math.floor(Math.random()*values.length)]; }
-    function shuffle(items) {
-      const copy = [...items];
-      for(let i=copy.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]];}
-      return copy;
-    }
-    function permutations(items) {
-      const result=[];
-      for(const a of items) for(const b of items) for(const c of items) {
-        if(a!==b && a!==c && b!==c) result.push({'1':a,'2':b,'3':c});
-      }
-      return result;
-    }
-    const ALL_ASSIGNMENTS=permutations(CHARACTERS);
-    function allowedClaims(identity) { return identity===RENAA?[...CHARACTERS]:CHARACTERS.filter(name=>name!==identity); }
-    function position(candidate,name) { return NUMBERS.findIndex(n=>candidate[n]===name); }
-    function evidenceFor(truth) {
-      return position(truth,'ひかる')<position(truth,RENAA)?['ひかる',RENAA]:[RENAA,'ひかる'];
-    }
-    function matchesSpeech(candidate,claims) {
-      return NUMBERS.every(n=>candidate[n]===RENAA || candidate[n]!==claims[n]);
-    }
-    function matchesFirst(candidate,claims,evidence) {
-      return matchesSpeech(candidate,claims) &&
-        position(candidate,evidence[0])<position(candidate,evidence[1]);
-    }
-    function initialPossibilities(claims,evidence) {
-      return ALL_ASSIGNMENTS.filter(candidate=>matchesFirst(candidate,claims,evidence));
-    }
-    function provable(possibilities) {
-      return possibilities.length>0 && new Set(possibilities.map(c=>NUMBERS.find(n=>c[n]===RENAA))).size===1;
-    }
-    function followupOptions(candidate,num,claims) {
-      return CHARACTERS.filter(name=>name!==claims[num] && (candidate[num]===RENAA || name!==candidate[num]));
-    }
-    function guaranteedFollowups(possibilities,claims) {
-      return NUMBERS.filter(num=>{
-        const map=new Map();
-        for(const candidate of possibilities) {
-          const renaaNum=NUMBERS.find(n=>candidate[n]===RENAA);
-          for(const answer of followupOptions(candidate,num,claims)) {
-            if(!map.has(answer)) map.set(answer,new Set());
-            map.get(answer).add(renaaNum);
-          }
-        }
-        return map.size>0 && [...map.values()].every(positions=>positions.size===1);
-      });
-    }
-    function makeRound() {
-      for(let attempt=0;attempt<1000;attempt++) {
-        const shuffled=shuffle(CHARACTERS);
-        const truth=Object.fromEntries(NUMBERS.map((n,i)=>[n,shuffled[i]]));
-        const claims=Object.fromEntries(NUMBERS.map(n=>[n,pick(allowedClaims(truth[n]))]));
-        const evidence=evidenceFor(truth);
-        const possibilities=initialPossibilities(claims,evidence);
-        const safe=guaranteedFollowups(possibilities,claims);
-        if(!provable(possibilities) && safe.length>0) return {truth,claims,evidence,possibilities,safe};
-      }
-      throw new Error('生成谜题失败，请重试。');
-    }
-    // 复盘只读取本局已经产生的公开线索与结算数据；不改变出题或判定算法。
-    function el(tag,className,text){
-      const node=document.createElement(tag);
-      if(className) node.className=className;
-      if(text!==undefined) node.textContent=String(text);
-      return node;
-    }
-    function renderCombo(candidate){
-      return NUMBERS.map(n=>`${n}号 ${candidate[n]}`).join(' · ');
-    }
-    function renaaNumber(candidate){return NUMBERS.find(n=>candidate[n]===RENAA);}
-    function traceCard(heading,combo,why,kept){
-      const node=el('div',`trace-card ${kept?'kept':'removed'}`);
-      node.append(el('div','trace-top',heading));
-      if(combo) node.append(el('div','combo',combo));
-      if(why) node.append(el('div','trace-why',why));
-      return node;
-    }
-    function addCards(parent,items){
-      const wrap=el('div','trace-list');
-      items.forEach(card=>wrap.append(card));
-      parent.append(wrap);
-    }
-    function addDetails(parent,title,cards){
-      if(cards.length===0)return;
-      const details=el('details','trace-details');
-      details.append(el('summary','',`${title}（${cards.length}）`));
-      addCards(details,cards);
-      parent.append(details);
-    }
-    function addStep(container,number,title,description){
-      const step=el('section','recap-step');
-      step.dataset.number=number;
-      step.append(el('h4','',title),el('p','',description));
-      container.append(step);
-      return step;
-    }
-    function addStat(parent,label,value){
-      const node=el('div','recap-stat');
-      node.append(el('span','stat-label',label),el('strong','stat-value',value));
-      parent.append(node);
-    }
-    function counterfactuals(num){
-      const answers=new Map();
-      for(const candidate of current.possibilities){
-        for(const possibleAnswer of followupOptions(candidate,num,current.claims)){
-          if(!answers.has(possibleAnswer)) answers.set(possibleAnswer,new Set());
-          answers.get(possibleAnswer).add(renaaNumber(candidate));
-        }
-      }
-      return [...answers.entries()].map(([answer,positions])=>({answer,positions:[...positions].sort()}));
-    }
-    function renderRecap(){
-      const stats=$('recapComparison');
-      const steps=$('recapSteps');
-      stats.replaceChildren();steps.replaceChildren();
-      const actual=renaaNumber(current.truth);
-      const proven=provable(remaining);
-      const correct=selectedGuess===actual;
-      addStat(stats,'你的追问',`${chosen}号 → ${followupAnswer}`);
-      addStat(stats,'保证解开的追问',current.safe.map(n=>`${n}号`).join('、'));
-      addStat(stats,'你的答案',`${selectedGuess}号`);
-      addStat(stats,'真正的れなぁ',`${actual}号`);
+const WORDS = {
+  zh: {
+    num: '{n}号', namesSeparator: '、',
+    ariaLanguage: '切换为日语', questionError: '暂时无法生成题目，请重试。',
+    labelSaid: '声称自己是', leftEvidence: '{left}在{right}的左边。',
+    askEmpty:'先选择一位追问对象', askChosen:'确定追问{num}（仅此一次）',
+    guessEmpty:'先选择你的答案', guessChosen:'提交答案：{num}', followupWho:'{num}第二次回答：',
+    resultGood:'回答正确 · 线索充分！',resultRightUnproven:'回答正确 · 还有其他可能',resultWrong:'这次没答对',
+    goodExplain:'你的答案正确，而且公开线索足以唯一确定れなぁ。下面可以对照系统的推理过程。',
+    rightUnprovenExplain:'你的答案正确。不过这次追问后的公开线索还不能唯一确定れなぁ；看看复盘，了解其他可能性。',
+    wrongProvenExplain:'公开线索已经能够唯一确定れなぁ，但你选了{guess}。正确答案是{actual}。',
+    wrongUnprovenExplain:'这次追问后，公开线索仍无法唯一确定れなぁ。可以看看其他追问选择会有什么不同。',
+    realLabel:'本局能够保证解开的追问对象：{safe}。你追问了{chosen}，得到回答「{answer}」。',
+    statAsk:'你的追问',statSafe:'保证解开的追问',statGuess:'你的答案',statReal:'真正的れなぁ',
+    step1:'只看第一次发言',step1Desc:'三个身份各不相同，一共有6种排列。ほのす、ひかる不能声称自己是本人；れなぁ可以。根据三句话，先留下{count}种可能。',
+    speechKeep:'符合发言规则',speechExcludedTitle:'查看被第一次发言排除的排列',speechRemoved:'违反说谎规则',
+    speechWhy:'如果{num}是{identity}，却声称自己是{claim}，就意味着必须说假话的人说了真话。',
+    step2:'再检查真实位置证据',step2Desc:'证据是「{evidence}」。位置从1号到3号依次向右；符合证据的剩下{count}种。',
+    evidenceKeep:'符合位置证据',evidencePosition:'{left}在{leftNum}，{right}在{rightNum}。',
+    evidenceExcludedTitle:'查看被位置证据排除的排列',evidenceRemove:'位置不符合',
+    evidenceWhy:'{left}在{leftNum}，{right}在{rightNum}；前者并不在后者左边。',
+    step3:'回看追问选择',step3Desc:'你追问了{chosen}。系统逐一检查追问1、2、3号可能得到的所有合法回答。只有每种回答都能确定れなぁ的位置，才是保证解开的选择。',
+    safeLabel:'保证可以解开',unsafeLabel:'可能仍有歧义',selectedLabel:' · 你选了这里',
+    answerIf:'如果回答「{answer}」',answerPossible:'れなぁ可能是：{positions}。{conclusion}',
+    answerUnique:'这个回答能唯一确定位置。',answerAmbiguous:'这个回答仍不能唯一确定位置。',
+    chosenSafe:'你选到了一位可以保证解开的追问对象。',
+    chosenUnsafe:'这个追问对象并非必胜：某些合法回答仍会留下多种可能。你可以看看其他对象的所有回答结果。',
+    step4:'用实际追问回答继续排除',step4Desc:'{chosen}第一次声称「{first}」，第二次回答「{answer}」。第二次不能重复第一次的名字；普通角色也不能说出真实身份。',
+    followupKeep:'保留这项假设',followupRemove:'排除这项假设',
+    followupWhy:'在这个假设中，{chosen}是{identity}，第二次只可能回答{options}。实际回答「{answer}」{conclusion}',
+    followupMatches:'与规则一致。',followupBreaks:'违反规则。',
+    step5:'对照答案与推理结论',step5Desc:'追问后剩下{count}种合法身份排列。',step5Keep:'追问后仍成立',step5Why:'这一项假设里，れなぁ在{num}。',
+    summaryGood:'最终只可能是{actual}。你的答案是{guess}，与系统推理结果一致！关键是第4步排除了其他身份排列。',
+    summaryWrong:'公开线索已经唯一指向{actual}，但你选了{guess}。可以回看第4步，看看哪个假设因第二次回答被排除。',
+    summaryAmbiguous:'实际的れなぁ是{actual}，你的答案是{guess}（{status}）。但根据本局公开信息，れなぁ仍可能是{positions}。可以比较第3步的追问对象，看看怎样才能保证找到答案。',
+    correct:'回答正确',incorrect:'回答错误',
+  },
+  ja: {
+    num:'{n}番',namesSeparator:'、',
+    ariaLanguage:'中国語に切り替え',questionError:'問題を作れませんでした。もう一度お試しください。',
+    labelSaid:'名乗った名前',leftEvidence:'{left}は{right}より左にいます。',
+    askEmpty:'質問する人を選んでください',askChosen:'{num}にもう一度聞く（質問は1回だけ）',
+    guessEmpty:'答えを選んでください',guessChosen:'{num}で回答する',followupWho:'{num}の2回目の答え：',
+    resultGood:'正解！ 手がかりから特定できた！',resultRightUnproven:'正解！ ただし別の可能性も',resultWrong:'今回は不正解',
+    goodExplain:'正解です！ しかも、今回の手がかりだけで本物のれなぁを特定できます。解説で推理を振り返ってみましょう。',
+    rightUnprovenExplain:'正解です！ ただし、今回の追加質問だけでは他の可能性も残ります。解説で確認してみましょう。',
+    wrongProvenExplain:'手がかりかられなぁは1人に絞れますが、あなたは{guess}を選びました。正解は{actual}です。',
+    wrongUnprovenExplain:'今回の質問では、手がかりだけでれなぁを1人に絞れませんでした。他の質問先ならどうなったか、解説で見てみましょう。',
+    realLabel:'必ず特定できる質問先：{safe}。あなたは{chosen}に聞き、「{answer}」という答えを得ました。',
+    statAsk:'あなたが質問した相手',statSafe:'必ず特定できる質問先',statGuess:'あなたの答え',statReal:'本当のれなぁ',
+    step1:'最初の発言を確認',step1Desc:'3人の正体は重複しないので、並び方は全部で6通り。ほのすとひかるは本当の名前を言えませんが、れなぁは言えます。発言を確認すると、{count}通りが残ります。',
+    speechKeep:'発言のルールに合う',speechExcludedTitle:'発言によって除外した並びを見る',speechRemoved:'嘘のルールに反する',
+    speechWhy:'{num}が{identity}だとすると、「{claim}」と本当の名前を名乗ってしまいます。嘘をつくはずの人が本当のことを言うため、この並びは除外します。',
+    step2:'位置の手がかりを確認',step2Desc:'手がかりは「{evidence}」。1番から3番へと右に並んでいます。位置の条件にも合うのは{count}通りです。',
+    evidenceKeep:'位置の条件に合う',evidencePosition:'{left}は{leftNum}、{right}は{rightNum}にいます。',
+    evidenceExcludedTitle:'位置の手がかりで除外した並びを見る',evidenceRemove:'位置の条件に合わない',
+    evidenceWhy:'{left}は{leftNum}、{right}は{rightNum}。この並びでは{left}が{right}より左にいません。',
+    step3:'質問先の選び方を振り返る',step3Desc:'あなたは{chosen}に質問しました。もし1・2・3番それぞれに聞いたら、どんな答えがあり得るでしょうか。どの答えでもれなぁの位置を1つに絞れる相手が、確実に解ける質問先です。',
+    safeLabel:'必ず特定できる',unsafeLabel:'絞り込めない場合がある',selectedLabel:' · あなたが選択',
+    answerIf:'「{answer}」と答えたら',answerPossible:'れなぁの候補：{positions}。{conclusion}',
+    answerUnique:'この答えなら位置を1つに絞れます。',answerAmbiguous:'この答えではまだ複数の候補が残ります。',
+    chosenSafe:'あなたが選んだ質問先なら、どんな合法的な答えでもれなぁを特定できます。',
+    chosenUnsafe:'今回の質問先では、答えによっては候補が複数残ります。他の相手に聞いた場合の結果と比べてみましょう。',
+    step4:'実際の2回目の答えを確認',step4Desc:'{chosen}は最初に「{first}」と名乗り、2回目は「{answer}」と答えました。2回目は1回目と違う名前でなければならず、ほのすとひかるは本当の名前も言えません。',
+    followupKeep:'この並びは残る',followupRemove:'この並びは除外',
+    followupWhy:'この並びだと{chosen}は{identity}なので、2回目に言えるのは{options}。実際の「{answer}」という答えは{conclusion}',
+    followupMatches:'ルールに合っています。',followupBreaks:'ルールに反します。',
+    step5:'答えと推理結果を比較',step5Desc:'追加質問後、ルールに合う並びは{count}通り残っています。',step5Keep:'まだ成り立つ並び',step5Why:'この並びではれなぁは{num}です。',
+    summaryGood:'れなぁは{actual}しかあり得ません。あなたの答えは{guess}で、推理結果と一致！ 第4段階でほかの並びを除外できています。',
+    summaryWrong:'手がかりかられなぁは{actual}とわかりますが、あなたは{guess}を選びました。第4段階でどの並びが除外されたか確認してみましょう。',
+    summaryAmbiguous:'本当のれなぁは{actual}、あなたの答えは{guess}（{status}）。ただし、公開された手がかりだけでは{positions}のどちらも考えられます。第3段階で、確実に見抜ける質問先を確認してみましょう。',
+    correct:'正解',incorrect:'不正解',
+  }
+};
+let language='zh';
+let current=null;
+let phase='welcome';
+let selectedAsk=null,selectedGuess=null,chosen=null,followupAnswer=null,remaining=null;
 
-      // 1. 初次发言：不查看实际身份，枚举三人位置的全部六种可能。
-      const afterSpeech=ALL_ASSIGNMENTS.filter(candidate=>matchesSpeech(candidate,current.claims));
-      const first=addStep(steps,'1','只看第一次发言',`三个身份各不相同，一共有6种排列。ほのす、ひかる不能声称自己是本人；れなぁ可以。根据三句话，先留下${afterSpeech.length}种可能。`);
-      addCards(first,afterSpeech.map(candidate=>traceCard('符合发言规则',renderCombo(candidate),null,true)));
-      const excludedSpeech=ALL_ASSIGNMENTS.filter(candidate=>!matchesSpeech(candidate,current.claims));
-      addDetails(first,'查看被第一次发言排除的排列',excludedSpeech.map(candidate=>{
-        const broken=NUMBERS.filter(n=>candidate[n]!==RENAA && candidate[n]===current.claims[n]);
-        return traceCard('违反说谎规则',renderCombo(candidate),broken.map(n=>`${n}号若是${candidate[n]}，却声称自己是${current.claims[n]}：必须说假话的人说了真话。`).join(' '),false);
-      }));
-
-      // 2. 客观证据：只在第一步保留下来的排列上检查位置。
-      const [left,right]=current.evidence;
-      const second=addStep(steps,'2','再检查真实位置证据',`证据是「${left}在${right}左边」。位置从1号到3号依次向右；符合证据的剩下${current.possibilities.length}种。`);
-      addCards(second,current.possibilities.map(candidate=>traceCard('证据符合',renderCombo(candidate),`${left}在${position(candidate,left)+1}号，${right}在${position(candidate,right)+1}号。`,true)));
-      const excludedEvidence=afterSpeech.filter(candidate=>!matchesFirst(candidate,current.claims,current.evidence));
-      addDetails(second,'查看被位置证据排除的排列',excludedEvidence.map(candidate=>traceCard('位置不符合',renderCombo(candidate),`${left}在${position(candidate,left)+1}号，${right}在${position(candidate,right)+1}号；前者不在后者左边。`,false)));
-
-      // 3. 复盘用户追问，以及追问的所有反事实后果；不同于系统窥看真实答案。
-      const third=addStep(steps,'3','回看追问选择',`你追问了${chosen}号。系统会检查：如果追问1、2、3号，各自所有合法回答会留下哪些れなぁ位置。只有每种回答都对应同一个位置，这个人才算「保证能解开」。`);
-      for(const num of NUMBERS){
-        const isSafe=current.safe.includes(num);
-        const selected=num===chosen;
-        const details=el('details','trace-details');
-        details.open=selected;
-        details.append(el('summary','',`${num}号：${isSafe?'保证可以解开':'可能仍有歧义'}${selected?' · 你选了这里':''}`));
-        const outcomes=counterfactuals(num).map(({answer,positions})=>traceCard(`如果回答「${answer}」`,null,`れなぁ可能是：${positions.map(n=>n+'号').join('、')}。${positions.length===1?'这个回答能唯一确定位置。':'这个回答仍不能唯一确定位置。'}`,positions.length===1));
-        addCards(details,outcomes);third.append(details);
-      }
-      third.append(el('p','',current.safe.includes(chosen)?'你选到了一位可以保证解开的追问对象。':'你选择的追问对象并非必胜：即使这次恰好得到有效回答，换一种合法回答仍可能无法确定答案。'));
-
-      // 4. 追问后的排除：逐一列出每项候选身份下对方允许说什么。
-      const fourth=addStep(steps,'4','用实际追问回答继续排除',`${chosen}号第一次声称「${current.claims[chosen]}」，第二次回答「${followupAnswer}」。同一个人不能重复第一次的名字；普通角色也不能说出真实身份。`);
-      addCards(fourth,current.possibilities.map(candidate=>{
-        const options=followupOptions(candidate,chosen,current.claims);
-        const allowed=options.includes(followupAnswer);
-        return traceCard(allowed?'保留这项假设':'排除这项假设',renderCombo(candidate),`在这个假设中，${chosen}号是${candidate[chosen]}，第二次只能回答「${options.join('」或「')}」。实际回答「${followupAnswer}」${allowed?'与规则一致。':'违反规则。'}`,allowed);
-      }));
-
-      // 5. 由玩家公开线索能推出的结论，以及用户选择与系统结论的区别。
-      const fifth=addStep(steps,'5','对照答案与推理结论',`追问后剩下${remaining.length}种合法身份排列。`);
-      addCards(fifth,remaining.map(candidate=>traceCard('追问后仍成立',renderCombo(candidate),`这一项假设里，れなぁ在${renaaNumber(candidate)}号。`,true)));
-      const summary=el('div','recap-summary');
-      if(proven){
-        summary.textContent=correct
-          ?`最终只可能是${actual}号。你的答案是${selectedGuess}号，与系统结论一致。现有证据足够证明这个答案；但系统无法判断你当时是不是靠猜测选中的。`
-          :`现有证据已经唯一指向${actual}号，但你选择了${selectedGuess}号。可以回看第4步，看看是哪一项假设被第二次回答排除了。`;
-      } else {
-        const validPositions=[...new Set(remaining.map(renaaNumber))].sort();
-        summary.textContent=`实际的れなぁ是${actual}号，你选了${selectedGuess}号${correct?'（碰巧答对）':'（回答错误）'}。但根据玩家当时拿到的全部公开信息，れなぁ仍可能是${validPositions.map(n=>n+'号').join('或')}，没有足够证据证明唯一答案。`;
-      }
-      fifth.append(summary);
-    }
-    function putText(id,value){$(id).textContent=value;}
-    function show(id,visible=true){$(id).hidden=!visible;}
-    function updateProgress(step){
-      for(let i=1;i<=3;i++){$('p'+i).className='progress-item '+(i<step?'done':i===step?'active':'');}
-    }
-    function setSelected(group,attribute,value){
-      for(const button of $(group).querySelectorAll('button')) {
-        const selected=button.dataset[attribute]===value;
-        button.classList.toggle('selected',selected);
-        button.setAttribute('aria-pressed',String(selected));
+function message(key,params={}){
+  const pattern=WORDS[language][key];
+  if(typeof pattern!=='string') throw Error('Missing translation: '+language+'.'+key);
+  return pattern.replace(/\{(\w+)\}/g,(whole,k)=>String(params[k]??whole));
+}
+function labelNum(n){return message('num',{n});}
+function candidateLocation(candidate,name){return labelNum(NUMBERS.find(n=>candidate[n]===name));}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+function shuffle(items){
+  const copy=[...items];
+  for(let i=copy.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]];}
+  return copy;
+}
+function permutations(items){
+  const result=[];
+  for(const a of items)for(const b of items)for(const c of items){
+    if(a!==b&&a!==c&&b!==c)result.push({'1':a,'2':b,'3':c});
+  }
+  return result;
+}
+const ALL_ASSIGNMENTS=permutations(CHARACTERS);
+function allowedClaims(identity){return identity===RENAA?[...CHARACTERS]:CHARACTERS.filter(name=>name!==identity);}
+function position(candidate,name){return NUMBERS.findIndex(n=>candidate[n]===name);}
+function evidenceFor(truth){return position(truth,'ひかる')<position(truth,RENAA)?['ひかる',RENAA]:[RENAA,'ひかる'];}
+function matchesSpeech(candidate,claims){return NUMBERS.every(n=>candidate[n]===RENAA||candidate[n]!==claims[n]);}
+function matchesFirst(candidate,claims,evidence){return matchesSpeech(candidate,claims)&&position(candidate,evidence[0])<position(candidate,evidence[1]);}
+function initialPossibilities(claims,evidence){return ALL_ASSIGNMENTS.filter(c=>matchesFirst(c,claims,evidence));}
+function provable(possibilities){return possibilities.length>0&&new Set(possibilities.map(c=>NUMBERS.find(n=>c[n]===RENAA))).size===1;}
+function followupOptions(candidate,num,claims){return CHARACTERS.filter(name=>name!==claims[num]&&(candidate[num]===RENAA||name!==candidate[num]));}
+function guaranteedFollowups(possibilities,claims){
+  return NUMBERS.filter(num=>{
+    const results=new Map();
+    for(const candidate of possibilities){
+      const renaaNum=renaaNumber(candidate);
+      for(const answer of followupOptions(candidate,num,claims)){
+        if(!results.has(answer))results.set(answer,new Set());
+        results.get(answer).add(renaaNum);
       }
     }
-    function startGame(){
-      try {current=makeRound();} catch(e){window.alert('暂时无法生成题目，请重试。');return;}
-      phase='choose';selectedAsk=null;selectedGuess=null;chosen=null;followupAnswer=null;remaining=null;
-      show('welcome',false);show('game');show('chooseSection');show('answerSection',false);show('resultSection',false);
-      updateProgress(1);
-      $('speakers').replaceChildren();
-      for(const num of NUMBERS){
-        const card=document.createElement('div');card.className='speaker';
-        const numNode=document.createElement('span');numNode.className='num';numNode.textContent=num+'号';
-        const said=document.createElement('span');said.className='said';said.textContent='声称自己是';
-        const claim=document.createElement('span');claim.className='claim';claim.textContent=current.claims[num];
-        card.append(numNode,said,claim);$('speakers').append(card);
-      }
-      putText('evidenceText',`${current.evidence[0]}在${current.evidence[1]}的左边。`);
-      setSelected('askChoices','ask','');setSelected('guessChoices','guess','');
-      $('confirmAsk').disabled=true;putText('confirmAsk','先选择一位追问对象');
-      $('submitGuess').disabled=true;putText('submitGuess','先选择你的答案');
-      window.scrollTo({top:0,behavior:'instant'});
+    return results.size>0&&[...results.values()].every(nums=>nums.size===1);
+  });
+}
+function makeRound(){
+  for(let attempt=0;attempt<1000;attempt++){
+    // 三个身份只打乱一次，保证一一对应。
+    const shuffled=shuffle(CHARACTERS);
+    const actualTruth=Object.fromEntries(NUMBERS.map((n,i)=>[n,shuffled[i]]));
+    const claims=Object.fromEntries(NUMBERS.map(n=>[n,pick(allowedClaims(actualTruth[n]))]));
+    const evidence=evidenceFor(actualTruth);
+    const possibilities=initialPossibilities(claims,evidence);
+    const safe=guaranteedFollowups(possibilities,claims);
+    if(!provable(possibilities)&&safe.length>0)return {truth:actualTruth,claims,evidence,possibilities,safe};
+  }
+  throw Error(message('questionError'));
+}
+function renaaNumber(candidate){return NUMBERS.find(n=>candidate[n]===RENAA);}
+function el(tag,className,text){
+  const node=document.createElement(tag);
+  if(className)node.className=className;
+  if(text!==undefined)node.textContent=String(text);
+  return node;
+}
+function renderCombo(candidate){return NUMBERS.map(n=>`${labelNum(n)} ${candidate[n]}`).join(' · ');}
+function traceCard(heading,combo,why,kept){
+  const node=el('div',`trace-card ${kept?'kept':'removed'}`);
+  node.append(el('div','trace-top',heading));
+  if(combo)node.append(el('div','combo',combo));
+  if(why)node.append(el('div','trace-why',why));
+  return node;
+}
+function addCards(parent,cards){const wrap=el('div','trace-list');cards.forEach(card=>wrap.append(card));parent.append(wrap);}
+function addDetails(parent,title,cards){
+  if(!cards.length)return;
+  const det=el('details','trace-details');
+  det.append(el('summary','',`${title}（${cards.length}）`));
+  addCards(det,cards);parent.append(det);
+}
+function addStep(container,number,title,description){
+  const step=el('section','recap-step');step.dataset.number=number;
+  step.append(el('h4','',title),el('p','',description));container.append(step);return step;
+}
+function addStat(parent,label,value){const div=el('div','recap-stat');div.append(el('span','stat-label',label),el('strong','stat-value',value));parent.append(div);}
+function counterfactuals(num){
+  const answers=new Map();
+  for(const candidate of current.possibilities){
+    for(const answer of followupOptions(candidate,num,current.claims)){
+      if(!answers.has(answer))answers.set(answer,new Set());
+      answers.get(answer).add(renaaNumber(candidate));
     }
-    for(const button of $('askChoices').querySelectorAll('button')){
-      button.addEventListener('click',()=>{
-        if(phase!=='choose') return;
-        selectedAsk=button.dataset.ask;
-        setSelected('askChoices','ask',selectedAsk);
-        $('confirmAsk').disabled=false;
-        putText('confirmAsk',`确定追问${selectedAsk}号（仅此一次）`);
-        updateProgress(2);
-      });
-    }
-    $('confirmAsk').addEventListener('click',()=>{
-      if(phase!=='choose'||!selectedAsk) return;
-      chosen=selectedAsk;
-      const options=followupOptions(current.truth,chosen,current.claims);
-      followupAnswer=pick(options);
-      remaining=current.possibilities.filter(candidate=>followupOptions(candidate,chosen,current.claims).includes(followupAnswer));
-      phase='answer';
-      putText('followupWho',`${chosen}号第二次说：`);
-      putText('followupAnswer',followupAnswer);
-      show('chooseSection',false);show('answerSection');updateProgress(3);
-      $('answerSection').scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  return [...answers.entries()].map(([answer,positions])=>({answer,positions:[...positions].sort()}));
+}
+function evidenceText(evidence){return message('leftEvidence',{left:evidence[0],right:evidence[1]});}
+function renderRecap(){
+  const stats=$('recapComparison'),steps=$('recapSteps');
+  stats.replaceChildren();steps.replaceChildren();
+  const actual=renaaNumber(current.truth),proven=provable(remaining),correct=selectedGuess===actual;
+  addStat(stats,message('statAsk'),`${labelNum(chosen)} → ${followupAnswer}`);
+  addStat(stats,message('statSafe'),current.safe.map(labelNum).join('、'));
+  addStat(stats,message('statGuess'),labelNum(selectedGuess));
+  addStat(stats,message('statReal'),labelNum(actual));
+  const afterSpeech=ALL_ASSIGNMENTS.filter(c=>matchesSpeech(c,current.claims));
+  const first=addStep(steps,'1',message('step1'),message('step1Desc',{count:afterSpeech.length}));
+  addCards(first,afterSpeech.map(c=>traceCard(message('speechKeep'),renderCombo(c),null,true)));
+  const excludedSpeech=ALL_ASSIGNMENTS.filter(c=>!matchesSpeech(c,current.claims));
+  addDetails(first,message('speechExcludedTitle'),excludedSpeech.map(c=>{
+    const broken=NUMBERS.filter(n=>c[n]!==RENAA&&c[n]===current.claims[n]);
+    const reasons=broken.map(n=>message('speechWhy',{num:labelNum(n),identity:c[n],claim:current.claims[n]})).join(' ');
+    return traceCard(message('speechRemoved'),renderCombo(c),reasons,false);
+  }));
+  const [left,right]=current.evidence;
+  const second=addStep(steps,'2',message('step2'),message('step2Desc',{evidence:evidenceText(current.evidence),count:current.possibilities.length}));
+  addCards(second,current.possibilities.map(c=>traceCard(message('evidenceKeep'),renderCombo(c),message('evidencePosition',{
+    left,right,leftNum:candidateLocation(c,left),rightNum:candidateLocation(c,right)
+  }),true)));
+  const excludedEvidence=afterSpeech.filter(c=>!matchesFirst(c,current.claims,current.evidence));
+  addDetails(second,message('evidenceExcludedTitle'),excludedEvidence.map(c=>traceCard(message('evidenceRemove'),renderCombo(c),message('evidenceWhy',{
+    left,right,leftNum:candidateLocation(c,left),rightNum:candidateLocation(c,right)
+  }),false)));
+  const third=addStep(steps,'3',message('step3'),message('step3Desc',{chosen:labelNum(chosen)}));
+  for(const num of NUMBERS){
+    const safe=current.safe.includes(num),selected=num===chosen;
+    const details=el('details','trace-details');details.open=selected;
+    details.append(el('summary','',`${labelNum(num)}：${message(safe?'safeLabel':'unsafeLabel')}${selected?message('selectedLabel'):''}`));
+    const cards=counterfactuals(num).map(({answer,positions})=>traceCard(message('answerIf',{answer}),null,message('answerPossible',{
+      positions:positions.map(labelNum).join('、'),answer,conclusion:message(positions.length===1?'answerUnique':'answerAmbiguous')
+    }),positions.length===1));
+    addCards(details,cards);third.append(details);
+  }
+  third.append(el('p','',message(current.safe.includes(chosen)?'chosenSafe':'chosenUnsafe')));
+  const fourth=addStep(steps,'4',message('step4'),message('step4Desc',{
+    chosen:labelNum(chosen),first:current.claims[chosen],answer:followupAnswer
+  }));
+  addCards(fourth,current.possibilities.map(c=>{
+    const options=followupOptions(c,chosen,current.claims),allowed=options.includes(followupAnswer);
+    const formatted=options.map(answer=>'「'+answer+'」').join(language==='ja'?'・':'或');
+    return traceCard(message(allowed?'followupKeep':'followupRemove'),renderCombo(c),message('followupWhy',{
+      chosen:labelNum(chosen),identity:c[chosen],options:formatted,answer:followupAnswer,
+      conclusion:message(allowed?'followupMatches':'followupBreaks')
+    }),allowed);
+  }));
+  const fifth=addStep(steps,'5',message('step5'),message('step5Desc',{count:remaining.length}));
+  addCards(fifth,remaining.map(c=>traceCard(message('step5Keep'),renderCombo(c),message('step5Why',{num:labelNum(renaaNumber(c))}),true)));
+  const sum=el('div','recap-summary');
+  if(proven){
+    sum.textContent=message(correct?'summaryGood':'summaryWrong',{actual:labelNum(actual),guess:labelNum(selectedGuess)});
+  }else{
+    const possible=[...new Set(remaining.map(renaaNumber))].sort().map(labelNum).join(language==='ja'?'、':'或');
+    sum.textContent=message('summaryAmbiguous',{
+      actual:labelNum(actual),guess:labelNum(selectedGuess),status:message(correct?'correct':'incorrect'),positions:possible
     });
-    for(const button of $('guessChoices').querySelectorAll('button')){
-      button.addEventListener('click',()=>{
-        if(phase!=='answer') return;
-        selectedGuess=button.dataset.guess;
-        setSelected('guessChoices','guess',selectedGuess);
-        $('submitGuess').disabled=false;
-        putText('submitGuess',`提交答案：${selectedGuess}号`);
-      });
-    }
-    $('submitGuess').addEventListener('click',()=>{
-      if(phase!=='answer'||!selectedGuess) return;
-      phase='result';
-      const actualNum=NUMBERS.find(n=>current.truth[n]===RENAA);
-      const correct=selectedGuess===actualNum;
-      const proven=provable(remaining);
-      const title=$('resultTitle');
-      title.className='result '+(correct&&proven?'success':correct?'warn':'wrong');
-      if(correct&&proven){title.textContent='回答正确 · 线索充分！';putText('resultExplanation','答案正确，而且公开线索足以唯一确定れなぁ。赛后复盘可以帮助你对照自己的推理过程。');}
-      else if(correct){title.textContent='猜对了，但不能证明';putText('resultExplanation','你的答案碰巧正确；但这次追问后，仍存在其他符合所有线索的身份排列，因此不算推理通关。');}
-      else if(proven){title.textContent='这次没猜中';putText('resultExplanation',`现有线索已经能够确定れなぁ，但你选择了${selectedGuess}号。正确答案是${actualNum}号。`);}
-      else{title.textContent='这次没猜中';putText('resultExplanation','这次追问后，公开线索仍无法唯一确定れなぁ；即使碰巧猜对，也不能算推理通关。');}
-      $('reveal').replaceChildren();
-      for(const num of NUMBERS){
-        const div=document.createElement('div');div.className='reveal-box'+(num===actualNum?' real':'');
-        const a=document.createElement('span');a.className='label';a.textContent=num+'号';
-        const b=document.createElement('span');b.className='name';b.textContent=current.truth[num];
-        div.append(a,b);$('reveal').append(div);
-      }
-      putText('resultTip',`本局能够保证解开的追问对象：${current.safe.map(n=>n+'号').join('、')}。你追问了${chosen}号，得到回答「${followupAnswer}」。`);
-      renderRecap();
-      show('answerSection',false);show('resultSection');
-      $('resultSection').scrollIntoView({behavior:'smooth',block:'start'});
-    });
-    $('startBtn').addEventListener('click',startGame);
-    $('newGameBtn').addEventListener('click',startGame);
-    $('jumpRecapBtn').addEventListener('click',()=>{$('recap').scrollIntoView({behavior:'smooth',block:'start'});});
-    const help=$('helpDialog');
-    $('helpBtn').addEventListener('click',()=>help.showModal());
-    $('closeHelp').addEventListener('click',()=>help.close());
-    help.addEventListener('click',e=>{if(e.target===help)help.close();});
+  }
+  fifth.append(sum);
+}
+function putText(id,text){$(id).textContent=text;}
+function show(id,visible=true){$(id).hidden=!visible;}
+function updateProgress(step){for(let i=1;i<=3;i++)$('p'+i).className='progress-item '+(i<step?'done':i===step?'active':'');}
+function setSelected(group,attribute,value){
+  for(const btn of $(group).querySelectorAll('button')){
+    const yes=btn.dataset[attribute]===value;
+    btn.classList.toggle('selected',yes);btn.setAttribute('aria-pressed',String(yes));
+  }
+}
+function renderResult(){
+  const actual=renaaNumber(current.truth),correct=selectedGuess===actual,proven=provable(remaining);
+  const title=$('resultTitle');
+  title.className='result '+(correct&&proven?'success':correct?'warn':'wrong');
+  putText('resultTitle',message(correct?(proven?'resultGood':'resultRightUnproven'):'resultWrong'));
+  putText('resultExplanation',correct?(proven?message('goodExplain'):message('rightUnprovenExplain')):
+    (proven?message('wrongProvenExplain',{guess:labelNum(selectedGuess),actual:labelNum(actual)}):message('wrongUnprovenExplain')));
+  $('reveal').replaceChildren();
+  for(const num of NUMBERS){
+    const card=el('div','reveal-box'+(num===actual?' real':''));
+    card.append(el('span','label',labelNum(num)),el('span','name',current.truth[num]));
+    $('reveal').append(card);
+  }
+  putText('resultTip',message('realLabel',{
+    safe:current.safe.map(labelNum).join('、'),chosen:labelNum(chosen),answer:followupAnswer
+  }));
+  renderRecap();
+}
+function render(){
+  document.documentElement.lang=language==='ja'?'ja':'zh-CN';
+  document.title=language==='ja'?'れなぁは誰？｜中日切り替え版':'猜猜谁是れなぁ · 中日双语版';
+  const meta=document.querySelector('meta[name="description"]');
+  if(meta)meta.content=language==='ja'?'3人の発言、確かな手がかり、1度の追加質問。本物のれなぁを見抜こう！ 推理の解説付き。':'三句发言、一条真实证据、一次追问。找出真正的れなぁ，结算后查看推理复盘。';
+  for(const node of document.querySelectorAll('[data-i18n]')){
+    node.innerHTML=STATIC_TRANSLATIONS[node.dataset.i18n][language];
+  }
+  for(const node of document.querySelectorAll('[data-i18n-aria]')){
+    node.setAttribute('aria-label',ARIA_TRANSLATIONS[node.dataset.i18nAria][language]);
+  }
+  putText('languageBtn',language==='zh'?'日本語':'中文');
+  $('languageBtn').setAttribute('aria-label',message('ariaLanguage'));
+  show('welcome',phase==='welcome');show('game',phase!=='welcome');
+  if(!current)return;
+  show('chooseSection',phase==='choose');show('answerSection',phase==='answer');show('resultSection',phase==='result');
+  updateProgress(phase==='choose'?(selectedAsk?2:1):3);
+  $('speakers').replaceChildren();
+  for(const num of NUMBERS){
+    const card=el('div','speaker');
+    card.append(el('span','num',labelNum(num)),el('span','said',message('labelSaid')),el('span','claim',current.claims[num]));
+    $('speakers').append(card);
+  }
+  putText('evidenceText',evidenceText(current.evidence));
+  setSelected('askChoices','ask',selectedAsk);
+  setSelected('guessChoices','guess',selectedGuess);
+  $('confirmAsk').disabled=!selectedAsk;
+  putText('confirmAsk',selectedAsk?message('askChosen',{num:labelNum(selectedAsk)}):message('askEmpty'));
+  $('submitGuess').disabled=!selectedGuess;
+  putText('submitGuess',selectedGuess?message('guessChosen',{num:labelNum(selectedGuess)}):message('guessEmpty'));
+  if(chosen!==null){putText('followupWho',message('followupWho',{num:labelNum(chosen)}));putText('followupAnswer',followupAnswer);}
+  if(phase==='result')renderResult();
+}
+function startGame(){
+  try{current=makeRound();}catch(err){window.alert(message('questionError'));return;}
+  phase='choose';selectedAsk=null;selectedGuess=null;chosen=null;followupAnswer=null;remaining=null;
+  render();window.scrollTo({top:0,behavior:'instant'});
+}
+function browserLanguage(){
+  const prefs=Array.isArray(navigator.languages)&&navigator.languages.length?navigator.languages:[navigator.language||''];
+  for(const value of prefs){
+    const primary=String(value).toLowerCase().split('-')[0];
+    if(primary==='ja'||primary==='zh')return primary;
+  }
+  return 'zh';
+}
+function savedLanguage(){
+  try{const value=window.localStorage.getItem('renaa-language');if(value==='zh'||value==='ja')return value;}catch(err){}
+  return null;
+}
+function saveLanguage(value){try{window.localStorage.setItem('renaa-language',value);}catch(err){}}
+
+for(const btn of $('askChoices').querySelectorAll('button')){
+  btn.addEventListener('click',()=>{if(phase!=='choose')return;selectedAsk=btn.dataset.ask;render();});
+}
+$('confirmAsk').addEventListener('click',()=>{
+  if(phase!=='choose'||!selectedAsk)return;
+  chosen=selectedAsk;
+  followupAnswer=pick(followupOptions(current.truth,chosen,current.claims));
+  remaining=current.possibilities.filter(c=>followupOptions(c,chosen,current.claims).includes(followupAnswer));
+  phase='answer';render();$('answerSection').scrollIntoView({behavior:'smooth',block:'start'});
+});
+for(const btn of $('guessChoices').querySelectorAll('button')){
+  btn.addEventListener('click',()=>{if(phase!=='answer')return;selectedGuess=btn.dataset.guess;render();});
+}
+$('submitGuess').addEventListener('click',()=>{
+  if(phase!=='answer'||!selectedGuess)return;
+  phase='result';render();$('resultSection').scrollIntoView({behavior:'smooth',block:'start'});
+});
+$('startBtn').addEventListener('click',startGame);
+$('newGameBtn').addEventListener('click',startGame);
+$('jumpRecapBtn').addEventListener('click',()=>$('recap').scrollIntoView({behavior:'smooth',block:'start'}));
+const help=$('helpDialog');
+$('helpBtn').addEventListener('click',()=>help.showModal());
+$('closeHelp').addEventListener('click',()=>help.close());
+help.addEventListener('click',e=>{if(e.target===help)help.close();});
+$('languageBtn').addEventListener('click',()=>{
+  language=language==='ja'?'zh':'ja';saveLanguage(language);render();
+});
+language=savedLanguage()||browserLanguage();
+render();
+
   </script>
 </body>
 </html>
