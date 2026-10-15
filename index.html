@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#14152a">
+  <meta name="description" content="《猜猜谁是れなぁ》手机友好的逻辑推理小游戏：三句发言、一条真实证据、一次追问。">
+  <title>猜猜谁是れなぁ · 试玩版</title>
+  <style>
+    :root{color-scheme:dark;--bg:#14152a;--panel:#20213b;--panel2:#292b49;--edge:#444563;--text:#f8f5fc;--muted:#cac6df;--pink:#f5a6d2;--pink2:#e97ebf;--violet:#a99bfb;--mint:#a7ead5;--red:#ffbdbf;--shadow:0 20px 50px #07081754}
+    *{box-sizing:border-box}
+    html{min-height:100%;background:var(--bg)}
+    body{margin:0;min-height:100vh;color:var(--text);font:16px/1.65 -apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Noto Sans CJK SC","Microsoft YaHei",sans-serif;background:radial-gradient(ellipse 90% 30% at 87% 0%,#4c315e 0%,transparent 90%),radial-gradient(ellipse 75% 40% at 0% 100%,#202750 0%,transparent 90%),var(--bg)}
+    button{font:inherit;cursor:pointer;border:0;touch-action:manipulation}
+    button:focus-visible,summary:focus-visible{outline:3px solid var(--mint);outline-offset:4px}
+    .shell{width:min(100% - 32px,850px);margin:0 auto;padding:22px 0 max(40px,env(safe-area-inset-bottom))}
+    .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:25px}
+    .brand{font-size:12px;letter-spacing:.14em;color:var(--pink);font-weight:800}
+    .subtle-btn{border:1px solid var(--edge);border-radius:999px;background:#22243f;color:var(--text);padding:9px 16px;font-size:13px;white-space:nowrap}
+    .hero,.surface{border:1px solid #55506f;background:linear-gradient(145deg,#292642,#20213a 75%);box-shadow:var(--shadow);border-radius:26px}
+    .hero{padding:clamp(22px,5vw,43px)}
+    .eyebrow{font-size:12px;letter-spacing:.11em;text-transform:uppercase;color:var(--pink);font-weight:800;margin:0 0 9px}
+    h1{font-size:clamp(30px,7vw,51px);line-height:1.2;letter-spacing:-.025em;margin:0 0 13px;overflow-wrap:anywhere}
+    h2{font-size:clamp(21px,4vw,27px);line-height:1.4;margin:0 0 9px}
+    h3{font-size:17px;margin:0 0 9px}
+    p{margin:0 0 13px}
+    .lede{font-size:17px;color:#e6dff2;max-width:600px}
+    .steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:24px 0}
+    .step{border-radius:15px;padding:14px;background:#ffffff0b;border:1px solid #6e648140;min-width:0}
+    .step strong{display:block;font-size:13px;color:var(--pink);margin-bottom:5px}
+    .step span{display:block;font-size:14px;line-height:1.5}
+    .rules{padding:17px 18px;border:1px solid var(--edge);border-radius:16px;background:#16182b7a;margin:18px 0}
+    .rules p{margin:0 0 9px;font-size:14px;color:var(--muted)}
+    .rules p:last-child{margin:0}
+    .rules strong{color:var(--text)}
+    .primary{width:100%;border-radius:15px;padding:16px 20px;background:linear-gradient(120deg,var(--pink),#c5adff);color:#21162f;font-weight:800;font-size:16px;box-shadow:0 8px 26px #d687c733}
+    .primary:hover{filter:brightness(1.04)}
+    .primary:disabled{opacity:.45;filter:grayscale(.45);cursor:not-allowed;box-shadow:none}
+    .secondary{border:1px solid var(--edge);border-radius:13px;padding:11px 16px;background:#292a49;color:var(--text);font-weight:700}
+    details{margin-top:16px;border-top:1px solid #67617d;padding-top:14px}
+    summary{cursor:pointer;color:var(--mint);font-weight:700;list-style-position:outside;margin-left:17px}
+    .example{margin:12px 0 0;font-size:14px;color:var(--muted)}
+    .example strong{color:var(--text)}
+    .small{font-size:13px;color:var(--muted)}
+    .center{text-align:center}
+    .gamehead{margin:0 0 19px}
+    .progress{display:flex;gap:8px;align-items:stretch;justify-content:space-between;margin-bottom:20px}
+    .progress-item{flex:1;min-width:0;border-bottom:3px solid #4b4969;padding:0 0 9px;color:#acabc3;font-weight:700;font-size:12px;text-align:center}
+    .progress-item.active{border-color:var(--pink);color:var(--text)}
+    .progress-item.done{border-color:var(--mint);color:var(--mint)}
+    .surface{padding:clamp(17px,4vw,28px);margin-bottom:14px}
+    .speaker-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}
+    .speaker{background:#15182e;border:1px solid #4d4e70;border-radius:18px;padding:18px 12px 20px;text-align:center;min-width:0;overflow-wrap:anywhere;word-break:normal}
+    .speaker .num{font-size:14px;font-weight:800;color:var(--muted);display:block;margin-bottom:13px}
+    .speaker .said{display:block;font-size:13px;color:#c9c7dd;margin-bottom:4px}
+    .speaker .claim{font-weight:800;font-size:clamp(19px,4vw,27px);color:var(--text);line-height:1.45;overflow-wrap:anywhere}
+    .evidence{border:1px solid #a0afc55c;background:#292d46;border-radius:17px;padding:17px 19px;margin-top:16px}
+    .evidence-label{font-size:12px;font-weight:800;color:var(--mint);margin-bottom:4px;letter-spacing:.04em}
+    .evidence-text{font-size:18px;font-weight:800;margin:0;line-height:1.55}
+    .task{font-size:14px;color:var(--muted);margin:0 0 17px}
+    .choice-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;margin-top:14px}
+    .choice{border:2px solid #62617c;background:#191b33;color:var(--text);min-width:0;border-radius:15px;padding:14px 5px;font-size:16px;font-weight:800}
+    .choice:hover{border-color:#b8a3ee}
+    .choice.selected{border-color:var(--pink);background:#503450;box-shadow:inset 0 0 0 1px var(--pink)}
+    .confirm{margin-top:17px}
+    .followup{border-left:4px solid var(--mint);border-radius:12px;background:#1d3541;padding:15px 18px;margin:16px 0}
+    .followup .who{font-size:14px;color:#c5e4df;margin-bottom:3px}
+    .followup .answer{font-size:24px;font-weight:800;margin:0}
+    .result{font-size:24px;line-height:1.45;margin-bottom:8px}
+    .success{color:var(--mint)}
+    .warn{color:#ffe0a4}
+    .wrong{color:var(--red)}
+    .reveal{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:12px 0 18px}
+    .reveal-box{padding:12px 5px;border:1px solid #4f4d71;border-radius:13px;text-align:center;background:#15182f;min-width:0}
+    .reveal-box.real{border-color:var(--pink);background:#443048}
+    .reveal-box .label{font-size:12px;color:var(--muted);display:block}
+    .reveal-box .name{display:block;font-weight:800;font-size:17px;overflow-wrap:anywhere}
+    .bottom-actions{display:flex;gap:9px;margin-top:17px}
+    .bottom-actions .primary{flex:1}
+    .footer{text-align:center;font-size:12px;color:#a3a0bd;margin-top:28px}
+    dialog{background:#25253f;color:var(--text);border:1px solid #79718b;border-radius:20px;width:min(calc(100% - 30px),520px);padding:24px;box-shadow:0 20px 65px #000a;max-height:85vh;overflow-y:auto}
+    dialog::backdrop{background:#080915b8}
+    dialog h2{font-size:23px}
+    dialog .secondary{width:100%;margin-top:13px}
+    [hidden]{display:none!important}
+    @media (max-width:570px){
+      .shell{width:min(100% - 24px,850px);padding-top:15px}
+      .topbar{margin-bottom:15px}
+      .hero,.surface{border-radius:20px}
+      .hero{padding:22px 18px}
+      .steps{grid-template-columns:1fr;gap:7px;margin:18px 0}
+      .step{padding:10px 12px;display:flex;align-items:center;gap:12px}
+      .step strong{margin:0;flex-shrink:0}
+      .speaker-list{grid-template-columns:1fr;gap:9px}
+      .speaker{display:grid;grid-template-columns:62px 1fr;grid-template-rows:auto auto;gap:0 11px;text-align:left;padding:11px 14px;align-items:center}
+      .speaker .num{grid-row:1 / 3;margin:0;border-right:1px solid #505170;height:100%;display:flex;align-items:center}
+      .speaker .said{margin:0;font-size:12px}
+      .speaker .claim{font-size:23px}
+      .reveal-box .name{font-size:15px}
+    }
+    @media (prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">✦ れなぁ · LOGIC GAME</div>
+      <button id="helpBtn" class="subtle-btn" type="button">玩法说明</button>
+    </header>
+    <section id="welcome" class="hero" aria-label="游戏介绍">
+      <p class="eyebrow">FAN-MADE · TEST VERSION 0.1</p>
+      <h1>猜猜谁是<br>れなぁ？</h1>
+      <p class="lede">三句发言，一条绝对真实的证据，以及只有一次的追问机会。你能找到真正的れなぁ吗？</p>
+      <div class="steps" aria-label="游戏流程">
+        <div class="step"><strong>01 观察</strong><span>听三个人的发言，阅读真实证据</span></div>
+        <div class="step"><strong>02 追问</strong><span>选择一个人，获得第二句话</span></div>
+        <div class="step"><strong>03 推理</strong><span>判断谁是れなぁ，提交答案</span></div>
+      </div>
+      <div class="rules">
+        <h3>先记住这四条规则</h3>
+        <p><strong>①</strong> 三个人分别是ほのす、ひかる、れなぁ，身份各不相同。</p>
+        <p><strong>②</strong> ほのす和ひかる一定说假话；<strong>れなぁ可以说真话，也可以说假话</strong>。</p>
+        <p><strong>③</strong> 系统给出的<strong>客观证据一定是真的</strong>；位置从左到右是1、2、3号。</p>
+        <p><strong>④</strong> 只能追问<strong>一人一次</strong>，这个人第二次说的名字必须与第一次不同。</p>
+      </div>
+      <button class="primary" type="button" id="startBtn">明白了，开始游戏 →</button>
+      <details>
+        <summary>先看一个简单的推理例子</summary>
+        <p class="example">假设<strong>1号说「ひかる」</strong>，那1号就<strong>不可能是ひかる</strong>：因为ひかる一定说假话。但1号仍可能是ほのす或者れなぁ。<br>卡片显示的是角色<strong>声称的身份</strong>，不是系统公布的真实身份。</p>
+      </details>
+    </section>
+    <section id="game" hidden aria-label="当前谜题">
+      <div class="progress" aria-label="游戏进度">
+        <span id="p1" class="progress-item active">1 · 阅读线索</span>
+        <span id="p2" class="progress-item">2 · 追问一次</span>
+        <span id="p3" class="progress-item">3 · 提交答案</span>
+      </div>
+      <div class="surface gamehead">
+        <p class="eyebrow">THE PUZZLE</p>
+        <h2>谁才是れなぁ？</h2>
+        <p class="task">下面三个名字是他们<strong>说出的身份</strong>，并非真实身份。记住：只有れなぁ可以说真话。</p>
+        <div id="speakers" class="speaker-list" aria-label="三个人的发言"></div>
+        <div class="evidence">
+          <div class="evidence-label">◇ 绝对真实的客观证据</div>
+          <p id="evidenceText" class="evidence-text"></p>
+          <p class="small" style="margin:4px 0 0">“在左边”不要求紧挨着；位置依次是1号、2号、3号。</p>
+        </div>
+      </div>
+      <section id="chooseSection" class="surface" aria-label="选择追问对象">
+        <p class="eyebrow">ONE QUESTION</p>
+        <h2>你要追问谁？</h2>
+        <p class="task">只有一次追问机会。题目保证存在一个能让你确定答案的选择，但不是每个人都值得追问。</p>
+        <div id="askChoices" class="choice-row" role="group" aria-label="选择追问对象">
+          <button class="choice" type="button" data-ask="1" aria-pressed="false">追问1号</button>
+          <button class="choice" type="button" data-ask="2" aria-pressed="false">追问2号</button>
+          <button class="choice" type="button" data-ask="3" aria-pressed="false">追问3号</button>
+        </div>
+        <button id="confirmAsk" class="primary confirm" type="button" disabled>先选择一位追问对象</button>
+      </section>
+      <section id="answerSection" class="surface" hidden aria-label="提交答案">
+        <p class="eyebrow">FINAL ANSWER</p>
+        <h2>现在，作出判断</h2>
+        <div class="followup" aria-live="polite">
+          <div id="followupWho" class="who"></div>
+          <p id="followupAnswer" class="answer"></p>
+        </div>
+        <p class="task">你已经使用了唯一一次追问。结合最初的发言与证据，选择真正的れなぁ。</p>
+        <div id="guessChoices" class="choice-row" role="group" aria-label="选择れなぁ的编号">
+          <button class="choice" type="button" data-guess="1" aria-pressed="false">1号</button>
+          <button class="choice" type="button" data-guess="2" aria-pressed="false">2号</button>
+          <button class="choice" type="button" data-guess="3" aria-pressed="false">3号</button>
+        </div>
+        <button id="submitGuess" class="primary confirm" type="button" disabled>先选择你的答案</button>
+      </section>
+      <section id="resultSection" class="surface" hidden aria-label="游戏结果" aria-live="polite">
+        <p class="eyebrow">RESULT</p>
+        <h2 id="resultTitle" class="result"></h2>
+        <p id="resultExplanation"></p>
+        <h3>三个人的真实身份</h3>
+        <div id="reveal" class="reveal"></div>
+        <p id="resultTip" class="small"></p>
+        <div class="bottom-actions">
+          <button id="newGameBtn" class="primary" type="button">再玩一局 →</button>
+        </div>
+      </section>
+    </section>
+    <footer class="footer">粉丝制作的非官方逻辑小游戏 · 试玩版 v0.1<br>本页不收集个人信息，游戏过程仅在浏览器内进行。</footer>
+  </main>
+  <dialog id="helpDialog" aria-labelledby="helpTitle">
+    <h2 id="helpTitle">玩法说明</h2>
+    <p>目标：根据三个人的发言和一条真实证据，找出谁是<strong>れなぁ</strong>。</p>
+    <div class="rules" style="margin:12px 0">
+      <p>每局的1、2、3号分别是<strong>ほのす、ひかる、れなぁ</strong>，每个身份恰好一个。</p>
+      <p><strong>ほのす、ひかる永远说假话</strong>：她们不能声称自己是真实身份。</p>
+      <p><strong>れなぁ可真可假</strong>，因此说出「れなぁ」的人也可能真的就是她。</p>
+      <p>客观位置证据<strong>永远真实</strong>。编号1→2→3从左到右排列；「在左边」不一定相邻。</p>
+      <p>你有<strong>一次</strong>追问机会，回答不能重复此人的第一句话。选择不同的人可能影响能否得到唯一答案。</p>
+    </div>
+    <p class="small">例子：1号说「ひかる」意味着1号不是ひかる，但不代表1号一定是れなぁ。</p>
+    <p class="small">只有答案正确且现有公开线索足够证明答案，才算<strong>推理通关</strong>。猜对但证据不足，会得到不同的提示。</p>
+    <button id="closeHelp" class="secondary" type="button">我知道了</button>
+  </dialog>
+  <script>
+    'use strict';
+    const CHARACTERS = ['ほのす','ひかる','れなぁ'];
+    const NUMBERS = ['1','2','3'];
+    const RENAA = 'れなぁ';
+    const $ = id => document.getElementById(id);
+    let current = null;
+    let phase = 'welcome';
+    let selectedAsk = null;
+    let selectedGuess = null;
+    let chosen = null;
+    let followupAnswer = null;
+    let remaining = null;
+
+    function pick(values) { return values[Math.floor(Math.random()*values.length)]; }
+    function shuffle(items) {
+      const copy = [...items];
+      for(let i=copy.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[copy[i],copy[j]]=[copy[j],copy[i]];}
+      return copy;
+    }
+    function permutations(items) {
+      const result=[];
+      for(const a of items) for(const b of items) for(const c of items) {
+        if(a!==b && a!==c && b!==c) result.push({'1':a,'2':b,'3':c});
+      }
+      return result;
+    }
+    const ALL_ASSIGNMENTS=permutations(CHARACTERS);
+    function allowedClaims(identity) { return identity===RENAA?[...CHARACTERS]:CHARACTERS.filter(name=>name!==identity); }
+    function position(candidate,name) { return NUMBERS.findIndex(n=>candidate[n]===name); }
+    function evidenceFor(truth) {
+      return position(truth,'ひかる')<position(truth,RENAA)?['ひかる',RENAA]:[RENAA,'ひかる'];
+    }
+    function matchesFirst(candidate,claims,evidence) {
+      return NUMBERS.every(n=>candidate[n]===RENAA || candidate[n]!==claims[n]) &&
+        position(candidate,evidence[0])<position(candidate,evidence[1]);
+    }
+    function initialPossibilities(claims,evidence) {
+      return ALL_ASSIGNMENTS.filter(candidate=>matchesFirst(candidate,claims,evidence));
+    }
+    function provable(possibilities) {
+      return possibilities.length>0 && new Set(possibilities.map(c=>NUMBERS.find(n=>c[n]===RENAA))).size===1;
+    }
+    function followupOptions(candidate,num,claims) {
+      return CHARACTERS.filter(name=>name!==claims[num] && (candidate[num]===RENAA || name!==candidate[num]));
+    }
+    function guaranteedFollowups(possibilities,claims) {
+      return NUMBERS.filter(num=>{
+        const map=new Map();
+        for(const candidate of possibilities) {
+          const renaaNum=NUMBERS.find(n=>candidate[n]===RENAA);
+          for(const answer of followupOptions(candidate,num,claims)) {
+            if(!map.has(answer)) map.set(answer,new Set());
+            map.get(answer).add(renaaNum);
+          }
+        }
+        return map.size>0 && [...map.values()].every(positions=>positions.size===1);
+      });
+    }
+    function makeRound() {
+      for(let attempt=0;attempt<1000;attempt++) {
+        const shuffled=shuffle(CHARACTERS);
+        const truth=Object.fromEntries(NUMBERS.map((n,i)=>[n,shuffled[i]]));
+        const claims=Object.fromEntries(NUMBERS.map(n=>[n,pick(allowedClaims(truth[n]))]));
+        const evidence=evidenceFor(truth);
+        const possibilities=initialPossibilities(claims,evidence);
+        const safe=guaranteedFollowups(possibilities,claims);
+        if(!provable(possibilities) && safe.length>0) return {truth,claims,evidence,possibilities,safe};
+      }
+      throw new Error('生成谜题失败，请重试。');
+    }
+    function putText(id,value){$(id).textContent=value;}
+    function show(id,visible=true){$(id).hidden=!visible;}
+    function updateProgress(step){
+      for(let i=1;i<=3;i++){$('p'+i).className='progress-item '+(i<step?'done':i===step?'active':'');}
+    }
+    function setSelected(group,attribute,value){
+      for(const button of $(group).querySelectorAll('button')) {
+        const selected=button.dataset[attribute]===value;
+        button.classList.toggle('selected',selected);
+        button.setAttribute('aria-pressed',String(selected));
+      }
+    }
+    function startGame(){
+      try {current=makeRound();} catch(e){window.alert('暂时无法生成题目，请重试。');return;}
+      phase='choose';selectedAsk=null;selectedGuess=null;chosen=null;followupAnswer=null;remaining=null;
+      show('welcome',false);show('game');show('chooseSection');show('answerSection',false);show('resultSection',false);
+      updateProgress(1);
+      $('speakers').replaceChildren();
+      for(const num of NUMBERS){
+        const card=document.createElement('div');card.className='speaker';
+        const numNode=document.createElement('span');numNode.className='num';numNode.textContent=num+'号';
+        const said=document.createElement('span');said.className='said';said.textContent='声称自己是';
+        const claim=document.createElement('span');claim.className='claim';claim.textContent=current.claims[num];
+        card.append(numNode,said,claim);$('speakers').append(card);
+      }
+      putText('evidenceText',`${current.evidence[0]}在${current.evidence[1]}的左边。`);
+      setSelected('askChoices','ask','');setSelected('guessChoices','guess','');
+      $('confirmAsk').disabled=true;putText('confirmAsk','先选择一位追问对象');
+      $('submitGuess').disabled=true;putText('submitGuess','先选择你的答案');
+      window.scrollTo({top:0,behavior:'instant'});
+    }
+    for(const button of $('askChoices').querySelectorAll('button')){
+      button.addEventListener('click',()=>{
+        if(phase!=='choose') return;
+        selectedAsk=button.dataset.ask;
+        setSelected('askChoices','ask',selectedAsk);
+        $('confirmAsk').disabled=false;
+        putText('confirmAsk',`确定追问${selectedAsk}号（仅此一次）`);
+        updateProgress(2);
+      });
+    }
+    $('confirmAsk').addEventListener('click',()=>{
+      if(phase!=='choose'||!selectedAsk) return;
+      chosen=selectedAsk;
+      const options=followupOptions(current.truth,chosen,current.claims);
+      followupAnswer=pick(options);
+      remaining=current.possibilities.filter(candidate=>followupOptions(candidate,chosen,current.claims).includes(followupAnswer));
+      phase='answer';
+      putText('followupWho',`${chosen}号第二次说：`);
+      putText('followupAnswer',followupAnswer);
+      show('chooseSection',false);show('answerSection');updateProgress(3);
+      $('answerSection').scrollIntoView({behavior:'smooth',block:'start'});
+    });
+    for(const button of $('guessChoices').querySelectorAll('button')){
+      button.addEventListener('click',()=>{
+        if(phase!=='answer') return;
+        selectedGuess=button.dataset.guess;
+        setSelected('guessChoices','guess',selectedGuess);
+        $('submitGuess').disabled=false;
+        putText('submitGuess',`提交答案：${selectedGuess}号`);
+      });
+    }
+    $('submitGuess').addEventListener('click',()=>{
+      if(phase!=='answer'||!selectedGuess) return;
+      phase='result';
+      const actualNum=NUMBERS.find(n=>current.truth[n]===RENAA);
+      const correct=selectedGuess===actualNum;
+      const proven=provable(remaining);
+      const title=$('resultTitle');
+      title.className='result '+(correct&&proven?'success':correct?'warn':'wrong');
+      if(correct&&proven){title.textContent='推理通关！';putText('resultExplanation','答案正确，而且追问后的公开线索足以唯一确定れなぁ。');}
+      else if(correct){title.textContent='猜对了，但不能证明';putText('resultExplanation','你的答案碰巧正确；但这次追问后，仍存在其他符合所有线索的身份排列，因此不算推理通关。');}
+      else if(proven){title.textContent='这次没猜中';putText('resultExplanation',`现有线索已经能够确定れなぁ，但你选择了${selectedGuess}号。正确答案是${actualNum}号。`);}
+      else{title.textContent='这次没猜中';putText('resultExplanation','这次追问后，公开线索仍无法唯一确定れなぁ；即使碰巧猜对，也不能算推理通关。');}
+      $('reveal').replaceChildren();
+      for(const num of NUMBERS){
+        const div=document.createElement('div');div.className='reveal-box'+(num===actualNum?' real':'');
+        const a=document.createElement('span');a.className='label';a.textContent=num+'号';
+        const b=document.createElement('span');b.className='name';b.textContent=current.truth[num];
+        div.append(a,b);$('reveal').append(div);
+      }
+      putText('resultTip',`本局能够保证解开的追问对象：${current.safe.map(n=>n+'号').join('、')}。你追问了${chosen}号，得到回答「${followupAnswer}」。`);
+      show('answerSection',false);show('resultSection');
+      $('resultSection').scrollIntoView({behavior:'smooth',block:'start'});
+    });
+    $('startBtn').addEventListener('click',startGame);
+    $('newGameBtn').addEventListener('click',startGame);
+    const help=$('helpDialog');
+    $('helpBtn').addEventListener('click',()=>help.showModal());
+    $('closeHelp').addEventListener('click',()=>help.close());
+    help.addEventListener('click',e=>{if(e.target===help)help.close();});
+  </script>
+</body>
+</html>
